@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #edf3f0;
+  --foreground: #18343b;
+  --sachprism-ink: #173b44;
+  --sachprism-jade: #237c7c;
+  --sachprism-coral: #e57368;
+  --font-interface: "Aptos", "Segoe UI Variable", "Avenir Next", system-ui, sans-serif;
+  --font-display: "Aptos Display", "Segoe UI Variable Display", "Avenir Next", system-ui, sans-serif;
+  --font-hero: "Fraunces", "Iowan Old Style", Georgia, serif;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-interface);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}
+
+.sachprism-app-shell {
+  background-color: #eaf1ee;
+  background-image:
+    linear-gradient(rgba(25, 77, 79, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(25, 77, 79, 0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.sachprism-sidebar {
+  color: #f5f8f6;
+  border-color: #365b60;
+  background-color: var(--sachprism-ink);
+  background-image: linear-gradient(155deg, #153a43 0%, #1a444a 58%, #1f5050 100%);
+}
+
+.sachprism-sidebar-label {
+  color: #a9cfca;
+}
+
+.sachprism-nav-item {
+  color: #e5f0ed;
+  border: 1px solid transparent;
+}
+
+.sachprism-nav-item:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+.sachprism-nav-item.is-active {
+  color: #ffffff;
+  border-color: rgba(196, 235, 224, 0.3);
+  background-color: #34777d;
+  box-shadow: inset 3px 0 0 #f1bd66;
+}
+
+.sachprism-side-note {
+  border: 1px solid #537a78;
+  background: rgba(239, 248, 244, 0.08);
+}
+
+.sachprism-mobile-header {
+  border-color: #d3e0dc;
+  background: rgba(247, 250, 248, 0.96);
+}
+
+/* Custom pulse and highlight animations */
+@keyframes highlight-fade {
+  0% { background-color: rgba(254, 226, 226, 0.9); }
+  50% { background-color: rgba(254, 202, 202, 1); }
+  100% { background-color: rgba(254, 226, 226, 0.9); }
+}
+
+.highlight-wrong {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-bottom: 2px dashed #ef4444;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  display: inline;
+}
+
+@keyframes step-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.97); }
+}
+
+.animate-step-pulse {
+  animation: step-pulse 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes loading-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loading-mark {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(12deg) scale(1.06); }
+}
+
+.animate-loading-enter {
+  animation: loading-enter 360ms ease-out both;
+}
+
+.animate-loading-mark {
+  animation: loading-mark 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.sachprism-hero-kicker {
+  color: #237c7c;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.sachprism-hero-title {
+  font-family: var(--font-hero);
+  color: #173b44;
+  font-weight: 600;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+.sachprism-hero-sub {
+  color: #4b6a70;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.verdict-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.verdict-pill::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.verdict-verified   { color: #14633f; background: #d9f3e6; border-color: #a9e0c3; }
+.verdict-false      { color: #9f2a22; background: #fde4e1; border-color: #f5b8b2; }
+.verdict-outdated   { color: #7a5200; background: #fff1cc; border-color: #f0d68a; }
+.verdict-partly     { color: #9a4a08; background: #ffe3c7; border-color: #f4bf8f; }
+.verdict-unverified { color: #4a4f7a; background: #e6e7f6; border-color: #c6c9ea; }

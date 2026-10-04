@@ -1,0 +1,10 @@
+[
+  {
+    "claim": "REPLACE_WITH_REAL_CLAIM_1",
+    "expectedVerdict": "VERIFIED"
+  },
+  {
+    "claim": "REPLACE_WITH_REAL_CLAIM_2",
+    "expectedVerdict": "FALSE"
+  }
+]
