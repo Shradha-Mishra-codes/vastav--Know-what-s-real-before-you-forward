@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Script from "next/script";
 import {
   ShieldCheck,
@@ -171,25 +172,179 @@ function SachPrismMark({ className = "h-10 w-10" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" className={className}>
       <defs>
-        <linearGradient id="sachprism-tile" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#176e78" />
-          <stop offset="0.58" stopColor="#347d9c" />
-          <stop offset="1" stopColor="#e26f68" />
+        <linearGradient id="sp-mark-bg" x1="8" y1="6" x2="58" y2="58">
+          <stop offset="0" stopColor="#152238" />
+          <stop offset="1" stopColor="#243b5c" />
+        </linearGradient>
+        <linearGradient id="sp-mark-accent" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#e8926f" />
+          <stop offset="1" stopColor="#d97852" />
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="17" fill="url(#sachprism-tile)" />
-      <path d="M10 46 28 14 46 46H10Z" fill="none" stroke="#f8fbfa" strokeWidth="3.2" strokeLinejoin="round" />
-      <path d="M5 32h30" fill="none" stroke="#f8fbfa" strokeWidth="3.2" strokeLinecap="round" />
-      <path d="m35 32 19-17" fill="none" stroke="#66d4ae" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="m35 32 22-7" fill="none" stroke="#ef8172" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M35 32h23" fill="none" stroke="#f4c95d" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="m35 32 22 8" fill="none" stroke="#e9edf0" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="m35 32 19 17" fill="none" stroke="#83d2dc" strokeWidth="3.4" strokeLinecap="round" />
+      <rect width="64" height="64" rx="18" fill="url(#sp-mark-bg)" />
+      <path
+        d="M32 11 48 20v18c0 10-7.5 16.5-16 21-8.5-4.5-16-11-16-21V20L32 11Z"
+        fill="rgba(255,255,255,0.08)"
+        stroke="rgba(255,255,255,0.92)"
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+      <circle cx="44" cy="44" r="11" fill="url(#sp-mark-accent)" />
+      <path
+        d="M39.5 44.2 42.8 47.5 49 41.2"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="26" cy="26" r="4.5" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2" />
+      <path d="M29 29l3 3" stroke="rgba(255,255,255,0.85)" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
 
+function RiskGauge({
+  score,
+  level,
+  reduceMotion,
+}: {
+  score: number;
+  level: string;
+  reduceMotion: boolean;
+}) {
+  const clamped = Math.max(0, Math.min(100, score));
+  const [displayScore, setDisplayScore] = useState(reduceMotion ? clamped : 0);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setDisplayScore(clamped);
+      return;
+    }
+    setDisplayScore(0);
+    let frame = 0;
+    const start = performance.now();
+    const duration = 880;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayScore(Math.round(clamped * eased));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [clamped, reduceMotion]);
+
+  const gaugeColor =
+    clamped <= 30
+      ? "var(--verdict-safe)"
+      : clamped <= 60
+      ? "var(--verdict-warn)"
+      : "var(--verdict-danger)";
+
+  return (
+    <div className="sp-panel flex flex-col gap-4 bg-gradient-to-br from-paper-elevated to-paper p-4 sm:flex-row sm:items-center sm:p-6">
+      <div
+        role="meter"
+        aria-label="Risk score"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={clamped}
+        aria-valuetext={`${clamped} out of 100, ${level}`}
+        className="risk-gauge-ring mx-auto grid h-24 w-24 shrink-0 place-items-center rounded-full p-2 sm:mx-0"
+        style={
+          {
+            "--gauge-color": gaugeColor,
+            "--gauge-fill": `${displayScore}%`,
+          } as React.CSSProperties
+        }
+      >
+        <div className="grid h-full w-full place-content-center rounded-full bg-paper-elevated text-center shadow-inner">
+          <span className="font-display text-3xl font-bold leading-none text-ink">{displayScore}</span>
+          <span className="mt-1 text-[10px] font-bold uppercase tracking-wide text-ink-soft">of 100</span>
+        </div>
+      </div>
+      <div className="min-w-0 text-center sm:text-left">
+        <p className="text-xs font-bold uppercase tracking-wider text-ink-soft">Forward risk</p>
+        <p className="mt-1 font-display text-xl font-bold" style={{ color: gaugeColor }}>
+          {level}
+        </p>
+        <p className="mt-2 text-sm text-ink-muted">Based on claim verdicts and detected persuasion tactics.</p>
+      </div>
+    </div>
+  );
+}
+
+function LoadingStepper({
+  steps,
+  currentStepIndex,
+  verifyingProgressText,
+  reduceMotion,
+}: {
+  steps: typeof LOADING_STEPS;
+  currentStepIndex: number;
+  verifyingProgressText: string;
+  reduceMotion: boolean;
+}) {
+  return (
+    <div className="loading-stepper-track">
+      <div className="loading-step-connector" aria-hidden="true">
+        <motion.div
+          className="h-full origin-left bg-accent"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: Math.max(0, currentStepIndex) / (steps.length - 1) }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.45, ease: "easeOut" }}
+        />
+      </div>
+      {steps.map((step, idx) => {
+        const isCompleted = idx < currentStepIndex;
+        const isCurrent = idx === currentStepIndex;
+        const stepDesc =
+          isCurrent && idx === 2 && verifyingProgressText.startsWith("Checking claim")
+            ? verifyingProgressText
+            : isCurrent && idx === 3 && verifyingProgressText.startsWith("Synthesizing")
+            ? verifyingProgressText
+            : step.desc;
+
+        return (
+          <div key={step.id} className="loading-step-node">
+            <motion.div
+              className={`grid h-9 w-9 place-items-center rounded-full border text-xs font-bold ${
+                isCompleted
+                  ? "border-transparent bg-[var(--verdict-safe)] text-white shadow-md"
+                  : isCurrent
+                  ? "border-accent/40 bg-accent-soft text-accent-hover shadow-md"
+                  : "border-ink/10 bg-paper text-ink-soft"
+              }`}
+              animate={isCurrent && !reduceMotion ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+              transition={{ duration: 1.6, repeat: isCurrent && !reduceMotion ? Infinity : 0 }}
+            >
+              {isCompleted ? (
+                <motion.span
+                  initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 22 }}
+                  className="grid place-items-center"
+                >
+                  <Check className="h-4 w-4" />
+                </motion.span>
+              ) : (
+                step.id
+              )}
+            </motion.div>
+            <div className="hidden min-w-0 sm:block">
+              <p className={`text-xs font-semibold ${isCurrent ? "text-ink" : "text-ink-muted"}`}>{step.title}</p>
+              <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-ink-soft">{stepDesc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function SachPrismHome() {
+  const reduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState<InputTab>("text");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [language, setLanguage] = useState<LanguageOption>("en");
@@ -902,30 +1057,30 @@ export default function SachPrismHome() {
     switch (verdict) {
       case "Verified":
         return {
-          bg: "bg-emerald-50 border-emerald-300 text-emerald-900",
-          icon: <CheckCircle2 className="w-8 h-8 text-emerald-600 shrink-0" />,
+          bg: "verdict-banner verdict-banner-verified",
+          icon: <CheckCircle2 className="h-9 w-9 shrink-0 text-[var(--verdict-safe)]" />,
           title: "Verified",
           description: "Authoritative sources confirm all key claims in this forward.",
         };
       case "Contains false claims":
         return {
-          bg: "bg-rose-50 border-rose-300 text-rose-900",
-          icon: <XCircle className="w-8 h-8 text-rose-600 shrink-0" />,
+          bg: "verdict-banner verdict-banner-false",
+          icon: <XCircle className="h-9 w-9 shrink-0 text-[var(--verdict-danger)]" />,
           title: "Contains False Claims",
           description: "One or more statements contradict verified facts and credible records.",
         };
       case "Cannot be confirmed":
         return {
-          bg: "bg-slate-100 border-slate-300 text-slate-800",
-          icon: <HelpCircle className="w-8 h-8 text-slate-600 shrink-0" />,
+          bg: "verdict-banner verdict-banner-neutral",
+          icon: <HelpCircle className="h-9 w-9 shrink-0 text-[var(--verdict-neutral)]" />,
           title: "Cannot Be Confirmed",
           description: "No reliable public sources or official registries verify these statements.",
         };
       case "Partly true / mixed":
       default:
         return {
-          bg: "bg-amber-50 border-amber-300 text-amber-900",
-          icon: <AlertTriangle className="w-8 h-8 text-amber-600 shrink-0" />,
+          bg: "verdict-banner verdict-banner-mixed",
+          icon: <AlertTriangle className="h-9 w-9 shrink-0 text-[var(--verdict-mixed)]" />,
           title: "Partly True / Mixed",
           description: "Contains some facts, but other claims are exaggerated, missing context, or outdated.",
         };
@@ -937,38 +1092,38 @@ export default function SachPrismHome() {
     switch (verdict) {
       case "VERIFIED":
         return {
-          badge: "bg-emerald-100 text-emerald-800 border-emerald-300",
-          border: "border-emerald-200",
-          indicator: "bg-emerald-500",
+          badge: "claim-badge-verified border",
+          border: "claim-border-verified",
+          indicator: "indicator-verified",
           label: "VERIFIED",
         };
       case "FALSE":
         return {
-          badge: "bg-rose-100 text-rose-800 border-rose-300",
-          border: "border-rose-200",
-          indicator: "bg-rose-500",
+          badge: "claim-badge-false border",
+          border: "claim-border-false",
+          indicator: "indicator-false",
           label: "FALSE",
         };
       case "OUTDATED":
         return {
-          badge: "bg-amber-100 text-amber-800 border-amber-300",
-          border: "border-amber-200",
-          indicator: "bg-amber-500",
+          badge: "claim-badge-outdated border",
+          border: "claim-border-outdated",
+          indicator: "indicator-outdated",
           label: "OUTDATED",
         };
       case "PARTLY_TRUE":
         return {
-          badge: "bg-orange-100 text-orange-800 border-orange-300",
-          border: "border-orange-200",
-          indicator: "bg-orange-500",
+          badge: "claim-badge-partly border",
+          border: "claim-border-partly",
+          indicator: "indicator-partly",
           label: "PARTLY TRUE",
         };
       case "UNVERIFIABLE":
       default:
         return {
-          badge: "bg-slate-100 text-slate-700 border-slate-300",
-          border: "border-slate-200",
-          indicator: "bg-slate-400",
+          badge: "claim-badge-unverified border",
+          border: "claim-border-unverified",
+          indicator: "indicator-unverified",
           label: "UNVERIFIABLE",
         };
     }
@@ -1037,7 +1192,7 @@ export default function SachPrismHome() {
       type="button"
       onClick={() => navigateTo(tab)}
       aria-current={activeTab === tab ? "page" : undefined}
-      className={`sachprism-nav-item flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#173d45] ${activeTab === tab ? "is-active" : ""}`}
+      className={`sachprism-nav-item flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-soft focus-visible:ring-offset-2 focus-visible:ring-offset-[#173d45] ${activeTab === tab ? "is-active" : ""}`}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span>{label}</span>
@@ -1105,20 +1260,25 @@ export default function SachPrismHome() {
   const trendingEntries = trendingItems.slice(0, 5);
 
   return (
-    <div className="sachprism-app-shell min-h-screen text-slate-950">
+    <motion.div
+      className="sachprism-app-shell min-h-screen text-ink"
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <aside className="sachprism-sidebar hidden w-64 shrink-0 flex-col border-r px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen">
           <div className="flex items-center gap-3 px-2">
             <SachPrismMark />
             <div>
               <p className="text-base font-extrabold text-white">SachPrism</p>
-              <p className="text-xs font-medium text-teal-100">See every side of a forward.</p>
+              <p className="text-xs font-medium text-white/65">See every side of a forward.</p>
             </div>
           </div>
           <div className="mt-8 flex-1 overflow-y-auto pb-4">{renderSidebarNavigation()}</div>
           <div className="sachprism-side-note rounded-lg p-3">
             <p className="text-xs font-bold text-white">A second look, before you forward.</p>
-            <p className="mt-1 text-xs leading-relaxed text-teal-100">
+            <p className="mt-1 text-xs leading-relaxed text-white/65">
               Check the source. Keep the context. Then decide.
             </p>
           </div>
@@ -1130,7 +1290,7 @@ export default function SachPrismHome() {
               type="button"
               aria-label="Close navigation"
               onClick={() => setSidebarOpen(false)}
-              className="absolute inset-0 bg-slate-950/40"
+              className="absolute inset-0 bg-ink/40"
             />
             <aside className="sachprism-sidebar relative z-10 flex h-full w-[min(18rem,86vw)] flex-col border-r px-4 py-5 shadow-xl">
               <div className="mb-8 flex items-center justify-between">
@@ -1138,14 +1298,14 @@ export default function SachPrismHome() {
                   <SachPrismMark />
                   <div>
                     <p className="text-base font-extrabold text-white">SachPrism</p>
-                    <p className="text-xs font-medium text-teal-100">See every side of a forward.</p>
+                    <p className="text-xs font-medium text-white/65">See every side of a forward.</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   aria-label="Close navigation"
                   onClick={() => setSidebarOpen(false)}
-                  className="grid h-10 w-10 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-200"
+                  className="grid h-10 w-10 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-soft"
                 >
                   <CloseIcon className="h-5 w-5" />
                 </button>
@@ -1153,7 +1313,7 @@ export default function SachPrismHome() {
               <div className="flex-1 overflow-y-auto">{renderSidebarNavigation()}</div>
               <div className="sachprism-side-note mt-5 rounded-lg p-3">
                 <p className="text-xs font-bold text-white">A second look, before you forward.</p>
-                <p className="mt-1 text-xs leading-relaxed text-teal-100">Check the source. Keep the context. Then decide.</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/65">Check the source. Keep the context. Then decide.</p>
               </div>
             </aside>
           </div>
@@ -1165,13 +1325,13 @@ export default function SachPrismHome() {
               type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open navigation"
-              className="grid h-10 w-10 place-items-center rounded-lg text-slate-800 hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700"
+              className="grid h-10 w-10 place-items-center rounded-lg text-ink hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Menu className="h-5 w-5" />
             </button>
             <div className="text-right">
-              <p className="text-sm font-bold text-slate-950">SachPrism</p>
-              <p className="text-xs text-slate-600">{viewTitles[activeTab]}</p>
+              <p className="text-sm font-bold text-ink">SachPrism</p>
+              <p className="text-xs text-ink-muted">{viewTitles[activeTab]}</p>
             </div>
           </div>
 
@@ -1180,26 +1340,31 @@ export default function SachPrismHome() {
             className="mx-auto w-full max-w-5xl flex-1 space-y-7 px-4 py-5 sm:px-6 sm:py-8"
           >
             {activeTab === "text" ? (
-              <header className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-7">
-  <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-    <SachPrismMark className="h-16 w-16 shrink-0 rounded-2xl shadow-lg sm:h-20 sm:w-20" />
-    <div className="min-w-0">
-      <p className="sachprism-hero-kicker">SachPrism</p>
-      <h1 className="sachprism-hero-title mt-1">See every side of a forward.</h1>
-      <p className="sachprism-hero-sub">Paste, upload or share. Get verdicts with proof.</p>
-    </div>
-  </div>
-  <div className="flex flex-wrap gap-2 sm:max-w-64 sm:justify-end" aria-label="Verdict categories">
-    <span className="verdict-pill verdict-verified">Verified</span>
-    <span className="verdict-pill verdict-false">False</span>
-    <span className="verdict-pill verdict-outdated">Outdated</span>
-    <span className="verdict-pill verdict-partly">Partly true</span>
-    <span className="verdict-pill verdict-unverified">Unverified</span>
-  </div>
-</header>
+              <header className="sachprism-hero-mesh relative flex flex-col gap-6 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-10">
+                <div className="relative z-10 flex min-w-0 items-start gap-4 sm:gap-6">
+                  <SachPrismMark className="h-16 w-16 shrink-0 rounded-2xl shadow-lifted sm:h-[5.5rem] sm:w-[5.5rem]" />
+                  <div className="min-w-0 pt-1">
+                    <p className="sachprism-hero-kicker">SachPrism</p>
+                    <h1 className="sachprism-hero-title mt-2">See every side of a forward.</h1>
+                    <p className="sachprism-hero-sub mt-3">
+                      Paste, upload, or share. Get clear verdicts backed by sources—not guesswork.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className="relative z-10 flex flex-wrap gap-2 sm:max-w-xs sm:justify-end"
+                  aria-label="Verdict categories"
+                >
+                  <span className="verdict-pill verdict-verified">Verified</span>
+                  <span className="verdict-pill verdict-false">False</span>
+                  <span className="verdict-pill verdict-outdated">Outdated</span>
+                  <span className="verdict-pill verdict-partly">Partly true</span>
+                  <span className="verdict-pill verdict-unverified">Unverified</span>
+                </div>
+              </header>
             ) : (
-              <header className="border-b border-slate-200 pb-5">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-teal-800">
+              <header className="subpage-header">
+                <p className="sachprism-hero-kicker">
                   {activeTab === "history"
                     ? "History"
                     : activeTab === "settings"
@@ -1212,14 +1377,25 @@ export default function SachPrismHome() {
                     ? "Learn"
                     : "Check"}
                 </p>
-                <h1 className="mt-1 text-2xl font-extrabold text-slate-950">{viewTitles[activeTab]}</h1>
-                <p className="mt-1 text-sm text-slate-700">{viewDescriptions[activeTab]}</p>
+                <h1 className="font-display mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+                  {viewTitles[activeTab]}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{viewDescriptions[activeTab]}</p>
               </header>
             )}
 
         {/* Input Section */}
         {!result && (
-          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
+          <section className="sp-panel space-y-6 p-4 sm:p-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={reduceMotion ? false : { opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, x: -12 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-6"
+              >
             {/* Tabs (scrollable on mobile) */}
             <div aria-hidden="true" className="hidden">
               <button
@@ -1230,8 +1406,8 @@ export default function SachPrismHome() {
                 }}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs sm:text-xs md:text-sm font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 sm:shrink ${
                   activeTab === "text"
-                    ? "bg-white text-indigo-700 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-accent-hover shadow-sm"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 <FileText className="w-3.5 h-3.5 shrink-0" />
@@ -1246,8 +1422,8 @@ export default function SachPrismHome() {
                 }}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs sm:text-xs md:text-sm font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 sm:shrink ${
                   activeTab === "image"
-                    ? "bg-white text-indigo-700 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-accent-hover shadow-sm"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5 shrink-0" />
@@ -1262,8 +1438,8 @@ export default function SachPrismHome() {
                 }}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs sm:text-xs md:text-sm font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 sm:shrink ${
                   activeTab === "audio"
-                    ? "bg-white text-indigo-700 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-accent-hover shadow-sm"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 <Mic className="w-3.5 h-3.5 shrink-0" />
@@ -1278,8 +1454,8 @@ export default function SachPrismHome() {
                 }}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs sm:text-xs md:text-sm font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 sm:shrink ${
                   activeTab === "pdf"
-                    ? "bg-white text-indigo-700 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-accent-hover shadow-sm"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 <FileIcon className="w-3.5 h-3.5 shrink-0" />
@@ -1294,8 +1470,8 @@ export default function SachPrismHome() {
                 }}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs sm:text-xs md:text-sm font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 sm:shrink ${
                   activeTab === "url"
-                    ? "bg-white text-indigo-700 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-accent-hover shadow-sm"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 <Link2 className="w-3.5 h-3.5 shrink-0" />
@@ -1311,8 +1487,8 @@ export default function SachPrismHome() {
                 aria-current={activeTab === "history" ? "page" : undefined}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 text-xs sm:text-xs md:text-sm font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 sm:shrink ${
                   activeTab === "history"
-                    ? "bg-white text-indigo-800 shadow-sm"
-                    : "text-slate-700 hover:text-slate-950"
+                    ? "bg-white text-accent-hover shadow-sm"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 <HistoryIcon className="w-3.5 h-3.5 shrink-0" />
@@ -1328,7 +1504,7 @@ export default function SachPrismHome() {
               <div className="space-y-2">
                 <label
                   htmlFor="text-input"
-                  className="block text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                  className="block text-xs font-semibold text-ink-muted uppercase tracking-wider"
                 >
                   Forward Message or Post Text
                 </label>
@@ -1338,7 +1514,7 @@ export default function SachPrismHome() {
                   value={textContent}
                   onChange={(e) => setTextContent(e.target.value)}
                   placeholder="Paste WhatsApp forward, tweet, or message here... (e.g. 'Government giving free laptops to all students via this link...')"
-                  className="w-full text-sm text-slate-800 bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition placeholder:text-slate-400"
+                  className="sp-input min-h-[8.5rem] resize-y"
                 />
               </div>
             )}
@@ -1346,22 +1522,22 @@ export default function SachPrismHome() {
             {/* Tab 2: Image */}
             {activeTab === "image" && (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider">
                   Upload Screenshot or Photo
                 </label>
 
                 {!imagePreview ? (
                   <label
                     htmlFor="image-upload"
-                    className="border-2 border-dashed border-slate-300 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition group"
+                    className="border-2 border-dashed border-ink/15 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-accent/50 hover:bg-accent-soft/30 transition group"
                   >
-                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition mb-3">
+                    <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center text-ink-soft group-hover:bg-accent-soft group-hover:text-accent transition mb-3">
                       <ImageIcon className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold text-ink">
                       Tap to choose screenshot
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-ink-soft mt-1">
                       PNG, JPG, or WEBP up to 8MB
                     </p>
                     <input
@@ -1374,7 +1550,7 @@ export default function SachPrismHome() {
                     />
                   </label>
                 ) : (
-                  <div className="relative border border-slate-200 rounded-xl overflow-hidden bg-slate-100 p-2">
+                  <div className="relative border border-ink/10 rounded-xl overflow-hidden bg-paper p-2">
                     <div className="max-h-60 overflow-hidden flex items-center justify-center rounded-lg bg-black/5">
                       <img
                         src={imagePreview}
@@ -1383,7 +1559,7 @@ export default function SachPrismHome() {
                       />
                     </div>
                     <div className="flex items-center justify-between mt-2 px-1">
-                      <span className="text-xs text-slate-600 font-medium truncate max-w-[200px]">
+                      <span className="text-xs text-ink-muted font-medium truncate max-w-[200px]">
                         {imageFile?.name || "Selected screenshot"}
                       </span>
                       <button
@@ -1402,22 +1578,22 @@ export default function SachPrismHome() {
             {/* Tab 3: Voice Note */}
             {activeTab === "audio" && (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider">
                   Upload WhatsApp / Telegram Audio Note
                 </label>
 
                 {!audioFile ? (
                   <label
                     htmlFor="audio-upload"
-                    className="border-2 border-dashed border-slate-300 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition group"
+                    className="border-2 border-dashed border-ink/15 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-accent/50 hover:bg-accent-soft/30 transition group"
                   >
-                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition mb-3">
+                    <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center text-ink-soft group-hover:bg-accent-soft group-hover:text-accent transition mb-3">
                       <Mic className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold text-ink">
                       Tap to choose audio note
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-ink-soft mt-1">
                       MP3, OGG, M4A, WAV, or WebM (up to 10MB)
                     </p>
                     <input
@@ -1430,16 +1606,16 @@ export default function SachPrismHome() {
                     />
                   </label>
                 ) : (
-                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-4 space-y-3">
+                  <div className="border border-ink/10 rounded-xl bg-paper p-4 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-accent-soft text-accent flex items-center justify-center shrink-0">
                         <Mic className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-slate-800 truncate">
+                        <p className="text-sm font-semibold text-ink truncate">
                           {audioFile.name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-ink-soft">
                           {(audioFile.size / (1024 * 1024)).toFixed(2)} MB • Audio recording
                         </p>
                       </div>
@@ -1467,22 +1643,22 @@ export default function SachPrismHome() {
             {/* Tab 4: PDF Document */}
             {activeTab === "pdf" && (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider">
                   Upload PDF Document / Circular
                 </label>
 
                 {!pdfFile ? (
                   <label
                     htmlFor="pdf-upload"
-                    className="border-2 border-dashed border-slate-300 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition group"
+                    className="border-2 border-dashed border-ink/15 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-accent/50 hover:bg-accent-soft/30 transition group"
                   >
-                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition mb-3">
+                    <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center text-ink-soft group-hover:bg-accent-soft group-hover:text-accent transition mb-3">
                       <FileIcon className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold text-ink">
                       Tap to choose PDF document
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-ink-soft mt-1">
                       PDF up to 10MB. Longer documents: only the first ~20 pages are analyzed.
                     </p>
                     <input
@@ -1495,16 +1671,16 @@ export default function SachPrismHome() {
                     />
                   </label>
                 ) : (
-                  <div className="border border-slate-200 rounded-xl bg-slate-50 p-4 flex items-center justify-between gap-3">
+                  <div className="border border-ink/10 rounded-xl bg-paper p-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                         <FileIcon className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 truncate">
+                        <p className="text-sm font-semibold text-ink truncate">
                           {pdfFile.name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-ink-soft">
                           {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB • PDF document
                         </p>
                       </div>
@@ -1526,12 +1702,12 @@ export default function SachPrismHome() {
               <div className="space-y-2">
                 <label
                   htmlFor="url-input"
-                  className="block text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                  className="block text-xs font-semibold text-ink-muted uppercase tracking-wider"
                 >
                   Article or Post Web Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-soft">
                     <Link2 className="w-4 h-4" />
                   </div>
                   <input
@@ -1540,7 +1716,7 @@ export default function SachPrismHome() {
                     value={urlContent}
                     onChange={(e) => setUrlContent(e.target.value)}
                     placeholder="https://example.com/news-story..."
-                    className="w-full text-sm text-slate-800 bg-slate-50/70 border border-slate-200 rounded-xl pl-10 pr-3.5 py-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition placeholder:text-slate-400"
+                    className="sp-input pl-10"
                   />
                 </div>
               </div>
@@ -1571,7 +1747,7 @@ export default function SachPrismHome() {
                 type="button"
                 disabled={isInputEmpty() || isLoading}
                 onClick={handleVerify}
-                className="w-full py-3.5 px-4 rounded-xl font-semibold text-sm sm:text-base text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-indigo-200 flex items-center justify-center gap-2"
+                className="sp-btn-primary w-full min-h-12 text-sm sm:text-base"
               >
                 <Search className="w-4 h-4" />
                 <span>Check now</span>
@@ -1579,10 +1755,10 @@ export default function SachPrismHome() {
             </div>
 
             {activeTab === "text" && (
-              <div className="border-t border-slate-200 pt-4 space-y-3">
+              <div className="border-t border-ink/10 pt-4 space-y-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <h2 className="text-sm font-bold text-slate-900">Try an example</h2>
-                  <p className="text-xs text-slate-600">Prefills the text box; nothing is submitted.</p>
+                  <h2 className="text-sm font-bold text-ink">Try an example</h2>
+                  <p className="text-xs text-ink-muted">Prefills the text box; nothing is submitted.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {SAMPLE_FORWARDS.map((sample) => (
@@ -1594,10 +1770,10 @@ export default function SachPrismHome() {
                         setTextContent(sample.text);
                         setError(null);
                       }}
-                      className="min-h-11 text-left p-3 rounded-lg border border-slate-300 bg-slate-50 hover:bg-white hover:border-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700 focus-visible:ring-offset-2 transition-colors"
+                      className="min-h-11 text-left p-3 rounded-lg border border-ink/15 bg-paper hover:bg-white hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-colors"
                     >
-                      <span className="block text-xs font-bold text-indigo-800">{sample.label}</span>
-                      <span className="mt-1 block text-xs leading-relaxed text-slate-700 line-clamp-2">{sample.text}</span>
+                      <span className="block text-xs font-bold text-accent-hover">{sample.label}</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-ink-muted line-clamp-2">{sample.text}</span>
                     </button>
                   ))}
                 </div>
@@ -1608,26 +1784,26 @@ export default function SachPrismHome() {
               <section aria-labelledby="trending-heading" className="space-y-5">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <h2 id="trending-heading" className="text-xl font-bold text-slate-950">Trending near you</h2>
-                    <p className="mt-1 text-sm text-slate-700">Common forward patterns from the SachPrism cache.</p>
+                    <h2 id="trending-heading" className="text-xl font-bold text-ink">Trending near you</h2>
+                    <p className="mt-1 text-sm text-ink-muted">Common forward patterns from the SachPrism cache.</p>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800">
-                    <MapPin className="h-3.5 w-3.5 text-teal-800" /> India · curated sample
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold text-ink">
+                    <MapPin className="h-3.5 w-3.5 text-accent-hover" /> India · curated sample
                   </span>
                 </div>
-                <p className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-700">
+                <p className="rounded-lg border border-ink/15 bg-paper px-3 py-2 text-xs leading-relaxed text-ink-muted">
                   This is a curated sample, not a live location feed or measure of current message volume.
                 </p>
 
                 {trendingLoading ? (
-                  <p role="status" className="rounded-lg bg-white px-4 py-7 text-center text-sm text-slate-700">Loading cached items…</p>
+                  <p role="status" className="rounded-lg bg-white px-4 py-7 text-center text-sm text-ink-muted">Loading cached items…</p>
                 ) : trendingError ? (
                   <div role="alert" className="rounded-lg border border-rose-300 bg-rose-50 p-4 text-sm text-rose-950">
                     <p>{trendingError}</p>
                     <button type="button" onClick={() => setTrendingLoaded(false)} className="mt-3 font-semibold underline">Try again</button>
                   </div>
                 ) : trendingItems.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-700">No cached trend examples are available.</p>
+                  <p className="rounded-lg border border-dashed border-ink/15 bg-white p-8 text-center text-sm text-ink-muted">No cached trend examples are available.</p>
                 ) : (
                   <>
                     {spotlightTrend && (
@@ -1646,21 +1822,21 @@ export default function SachPrismHome() {
                       </article>
                     )}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-bold text-slate-950">Commonly forwarded</h3>
+                      <h3 className="text-sm font-bold text-ink">Commonly forwarded</h3>
                       {trendingEntries.map((item) => {
                         const verdictStyle = getVerdictStyle(item.verdict);
                         return (
-                          <article key={item.claim} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                            <h4 className="min-w-0 break-words text-sm font-semibold text-slate-950">{item.claim}</h4>
+                          <article key={item.claim} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 rounded-xl border border-ink/10 bg-white p-4 shadow-sm">
+                            <h4 className="min-w-0 break-words text-sm font-semibold text-ink">{item.claim}</h4>
                             <span className={`row-span-2 self-start rounded-full border px-2.5 py-1 text-[11px] font-bold ${verdictStyle.badge}`}>{verdictStyle.label}</span>
-                            <p className="text-xs leading-relaxed text-slate-700">{item.explanation}</p>
+                            <p className="text-xs leading-relaxed text-ink-muted">{item.explanation}</p>
                             <button
                               type="button"
                               onClick={() => {
                                 setTextContent(item.claim);
                                 navigateTo("text");
                               }}
-                              className="col-span-2 inline-flex min-h-10 items-center gap-1.5 justify-self-start rounded-md text-xs font-bold text-teal-800 hover:text-teal-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700"
+                              className="col-span-2 inline-flex min-h-10 items-center gap-1.5 justify-self-start rounded-md text-xs font-bold text-accent-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                             >
                               Check this claim <ArrowRight className="h-3.5 w-3.5" />
                             </button>
@@ -1674,8 +1850,8 @@ export default function SachPrismHome() {
             ) : activeTab === "learn" ? (
               <section aria-labelledby="learn-heading" className="space-y-6">
                 <div>
-                  <h2 id="learn-heading" className="text-xl font-bold text-slate-950">Learn to check a forward</h2>
-                  <p className="mt-1 text-sm text-slate-700">Small habits that help you pause, verify, and share responsibly.</p>
+                  <h2 id="learn-heading" className="text-xl font-bold text-ink">Learn to check a forward</h2>
+                  <p className="mt-1 text-sm text-ink-muted">Small habits that help you pause, verify, and share responsibly.</p>
                 </div>
 
                 <article className="rounded-xl border border-sky-300 bg-sky-50 p-4 sm:p-5">
@@ -1691,24 +1867,24 @@ export default function SachPrismHome() {
                 </article>
 
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-slate-950">Mini quiz</h3>
+                  <h3 className="text-sm font-bold text-ink">Mini quiz</h3>
                   {LEARN_QUIZ.map((question, questionIndex) => {
                     const selectedAnswer = learnAnswers[questionIndex];
                     return (
-                      <article key={question.question} className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-                        <p className="text-sm font-bold text-slate-950">{questionIndex + 1}. {question.question}</p>
+                      <article key={question.question} className="rounded-xl border border-ink/10 bg-white p-4 sm:p-5 shadow-sm">
+                        <p className="text-sm font-bold text-ink">{questionIndex + 1}. {question.question}</p>
                         <div role="group" aria-label={`Question ${questionIndex + 1} answers`} className="mt-3 space-y-2">
                           {question.options.map((option, optionIndex) => {
                             const answered = selectedAnswer !== undefined;
                             const isCorrect = optionIndex === question.correctIndex;
                             const isSelected = optionIndex === selectedAnswer;
                             const answerStyle = !answered
-                              ? "border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
+                              ? "border-ink/15 bg-white text-ink hover:bg-paper"
                               : isCorrect
                               ? "border-emerald-400 bg-emerald-50 text-emerald-950"
                               : isSelected
                               ? "border-rose-400 bg-rose-50 text-rose-950"
-                              : "border-slate-200 bg-slate-50 text-slate-700";
+                              : "border-ink/10 bg-paper text-ink-muted";
                             return (
                               <button
                                 key={option}
@@ -1716,7 +1892,7 @@ export default function SachPrismHome() {
                                 disabled={answered}
                                 aria-pressed={isSelected}
                                 onClick={() => setLearnAnswers((previous) => ({ ...previous, [questionIndex]: optionIndex }))}
-                                className={`min-h-11 w-full rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 ${answerStyle}`}
+                                className={`min-h-11 w-full rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${answerStyle}`}
                               >
                                 {option}
                               </button>
@@ -1732,25 +1908,25 @@ export default function SachPrismHome() {
                     );
                   })}
                   {Object.keys(learnAnswers).length > 0 && (
-                    <button type="button" onClick={() => setLearnAnswers({})} className="min-h-10 rounded-md px-3 text-sm font-semibold text-teal-800 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700">
+                    <button type="button" onClick={() => setLearnAnswers({})} className="min-h-10 rounded-md px-3 text-sm font-semibold text-accent-hover hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
                       Try the quiz again
                     </button>
                   )}
                 </div>
 
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-slate-950">How we checked this</h3>
-                  <details className="group rounded-xl border border-slate-200 bg-white p-4">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-950">
-                      Spot a fake screenshot <ChevronDown className="h-4 w-4 shrink-0 text-teal-800 transition-transform group-open:rotate-180" />
+                  <h3 className="text-sm font-bold text-ink">How we checked this</h3>
+                  <details className="group rounded-xl border border-ink/10 bg-white p-4">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-ink">
+                      Spot a fake screenshot <ChevronDown className="h-4 w-4 shrink-0 text-accent-hover transition-transform group-open:rotate-180" />
                     </summary>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-700">Search for the exact headline on the named organization’s official site. Check the URL, date, and whether the same notice appears in a trusted source.</p>
+                    <p className="mt-3 text-sm leading-relaxed text-ink-muted">Search for the exact headline on the named organization’s official site. Check the URL, date, and whether the same notice appears in a trusted source.</p>
                   </details>
-                  <details className="group rounded-xl border border-slate-200 bg-white p-4">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-950">
-                      Old news, new date <ChevronDown className="h-4 w-4 shrink-0 text-teal-800 transition-transform group-open:rotate-180" />
+                  <details className="group rounded-xl border border-ink/10 bg-white p-4">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-ink">
+                      Old news, new date <ChevronDown className="h-4 w-4 shrink-0 text-accent-hover transition-transform group-open:rotate-180" />
                     </summary>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-700">Look for the original publication date and compare it with the date in the forward. A genuine old story can be recirculated with a misleading new caption.</p>
+                    <p className="mt-3 text-sm leading-relaxed text-ink-muted">Look for the original publication date and compare it with the date in the forward. A genuine old story can be recirculated with a misleading new caption.</p>
                   </details>
                 </div>
               </section>
@@ -1758,8 +1934,8 @@ export default function SachPrismHome() {
               <section aria-labelledby="history-heading" className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 id="history-heading" className="text-lg font-bold text-slate-950">Check history</h2>
-                    <p className="mt-1 text-sm text-slate-700">Stored only in this browser.</p>
+                    <h2 id="history-heading" className="text-lg font-bold text-ink">Check history</h2>
+                    <p className="mt-1 text-sm text-ink-muted">Stored only in this browser.</p>
                   </div>
                   <button
                     type="button"
@@ -1785,7 +1961,7 @@ export default function SachPrismHome() {
                     value={historyQuery}
                     onChange={(event) => setHistoryQuery(event.target.value)}
                     placeholder="Filter by claim text or verdict"
-                    className="w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-600 focus:border-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-700/20"
+                    className="w-full min-h-11 rounded-lg border border-ink/15 bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
                   />
                 </label>
                 <div role="group" aria-label="Filter history by verdict" className="flex gap-2 overflow-x-auto pb-1">
@@ -1813,10 +1989,10 @@ export default function SachPrismHome() {
                         type="button"
                         aria-pressed={historyVerdictFilter === filter}
                         onClick={() => setHistoryVerdictFilter(filter)}
-                        className={`min-h-10 shrink-0 rounded-full border px-3 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700 focus-visible:ring-offset-2 ${
+                        className={`min-h-10 shrink-0 rounded-full border px-3 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
                           historyVerdictFilter === filter
-                            ? "border-indigo-800 bg-indigo-800 text-white"
-                            : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+                            ? "border-ink-surface bg-ink-surface text-white"
+                            : "border-ink/15 bg-white text-ink hover:bg-paper"
                         }`}
                       >
                         {label} <span className="ml-1 opacity-80">{count}</span>
@@ -1825,8 +2001,22 @@ export default function SachPrismHome() {
                   })}
                 </div>
                 {history.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm font-medium text-slate-700">
-                    No checks yet — your verified forwards will appear here.
+                  <div className="sp-empty-state">
+                    <div className="relative">
+                      <div className="grid h-16 w-16 place-items-center rounded-2xl bg-accent-soft text-accent shadow-card">
+                        <HistoryIcon className="h-8 w-8" />
+                      </div>
+                      <Search className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-paper-elevated bg-ink-surface p-1 text-white" />
+                    </div>
+                    <div className="max-w-sm space-y-2">
+                      <p className="font-display text-lg font-bold text-ink">No checks saved yet</p>
+                      <p className="text-sm text-ink-muted">
+                        Run your first forward check—results stay in this browser so you can revisit them anytime.
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => navigateTo("text")} className="sp-btn-primary min-h-11 px-5">
+                      Check a forward
+                    </button>
                   </div>
                 ) : (() => {
                   const query = historyQuery.trim().toLowerCase();
@@ -1845,11 +2035,11 @@ export default function SachPrismHome() {
                   });
 
                   return filteredHistory.length === 0 ? (
-                    <p className="rounded-lg bg-slate-50 px-4 py-6 text-center text-sm text-slate-700">
+                    <p className="rounded-lg bg-paper px-4 py-6 text-center text-sm text-ink-muted">
                       No checks match that filter.
                     </p>
                   ) : (
-                    <ol className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+                    <ol className="divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white">
                       {filteredHistory.map((entry) => {
                         const score = entry.result.riskScore ?? 0;
                         const overall = entry.result.overall;
@@ -1871,13 +2061,13 @@ export default function SachPrismHome() {
                                 setError(null);
                                 window.scrollTo({ top: 0, behavior: "smooth" });
                               }}
-                              className="grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 p-4 text-left hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-700"
+                              className="grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 p-4 text-left hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
                             >
-                              <span className="min-w-0 truncate text-sm font-semibold text-slate-900">{excerpt}</span>
+                              <span className="min-w-0 truncate text-sm font-semibold text-ink">{excerpt}</span>
                               <span className={`row-span-2 self-start rounded-full border px-2 py-1 text-[11px] font-bold ${verdictColor}`}>
                                 {overall}
                               </span>
-                              <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700">
+                              <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
                                 <span>Risk {score}/100</span>
                                 <time dateTime={new Date(entry.checkedAt).toISOString()}>{formatTimeAgo(entry.checkedAt)}</time>
                               </span>
@@ -1892,8 +2082,8 @@ export default function SachPrismHome() {
             ) : activeTab === "settings" ? (
               <section aria-labelledby="settings-heading" className="space-y-7">
                 <div>
-                  <h2 id="settings-heading" className="text-lg font-bold text-slate-950">Response language</h2>
-                  <p className="mt-1 text-sm text-slate-700">New checks ask Gemini to write explanations in your selected language.</p>
+                  <h2 id="settings-heading" className="text-lg font-bold text-ink">Response language</h2>
+                  <p className="mt-1 text-sm text-ink-muted">New checks ask Gemini to write explanations in your selected language.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                   {([
@@ -1909,22 +2099,22 @@ export default function SachPrismHome() {
                       type="button"
                       aria-pressed={language === value}
                       onClick={() => setLanguage(value)}
-                      className={`min-h-14 rounded-lg border p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700 focus-visible:ring-offset-2 ${
+                      className={`min-h-14 rounded-lg border p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
                         language === value
-                          ? "border-indigo-700 bg-indigo-50 text-indigo-950"
-                          : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+                          ? "border-accent bg-accent-soft text-ink"
+                          : "border-ink/15 bg-white text-ink hover:bg-paper"
                       }`}
                     >
                       <span className="block text-sm font-bold">{label}</span>
-                      <span className="mt-1 block text-xs text-slate-700">{description}</span>
+                      <span className="mt-1 block text-xs text-ink-muted">{description}</span>
                     </button>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4">
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-ink/10 bg-white p-4">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-950">Read answers aloud</h3>
-                    <p className="mt-1 text-sm text-slate-700">Automatically speak each new result using your selected language.</p>
+                    <h3 className="text-sm font-bold text-ink">Read answers aloud</h3>
+                    <p className="mt-1 text-sm text-ink-muted">Automatically speak each new result using your selected language.</p>
                   </div>
                   <label className="relative inline-flex shrink-0 cursor-pointer items-center">
                     <input
@@ -1934,12 +2124,12 @@ export default function SachPrismHome() {
                       onChange={(event) => setReadAnswersAloud(event.target.checked)}
                       aria-label="Read answers aloud"
                     />
-                    <span className="h-6 w-11 rounded-full bg-slate-400 transition-colors peer-checked:bg-indigo-800 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-indigo-700 peer-focus-visible:ring-offset-2 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" />
+                    <span className="h-6 w-11 rounded-full bg-slate-400 transition-colors peer-checked:bg-ink-surface peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-focus-visible:ring-offset-2 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" />
                   </label>
                 </div>
 
                 <fieldset className="space-y-3">
-                  <legend className="text-sm font-bold text-slate-950">Text size</legend>
+                  <legend className="text-sm font-bold text-ink">Text size</legend>
                   <div className="grid grid-cols-3 gap-2">
                     {([
                       ["small", "Small", "A"],
@@ -1951,10 +2141,10 @@ export default function SachPrismHome() {
                         type="button"
                         aria-pressed={textSize === value}
                         onClick={() => setTextSize(value)}
-                        className={`min-h-14 rounded-lg border px-3 py-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700 focus-visible:ring-offset-2 ${
+                        className={`min-h-14 rounded-lg border px-3 py-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
                           textSize === value
-                            ? "border-indigo-800 bg-indigo-50 text-indigo-950"
-                            : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+                            ? "border-ink-surface bg-accent-soft text-ink"
+                            : "border-ink/15 bg-white text-ink hover:bg-paper"
                         }`}
                       >
                         <span className={`${value === "small" ? "text-xs" : value === "large" ? "text-xl" : "text-base"}`}>{sample}</span>
@@ -1964,9 +2154,9 @@ export default function SachPrismHome() {
                   </div>
                 </fieldset>
 
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <h3 className="text-sm font-bold text-slate-950">History storage</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                <div className="rounded-lg border border-ink/10 bg-paper p-4">
+                  <h3 className="text-sm font-bold text-ink">History storage</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-muted">
                     Your last 50 full check results are stored in this browser. Use History to review or clear them.
                   </p>
                 </div>
@@ -1986,13 +2176,13 @@ export default function SachPrismHome() {
                   </ul>
                 </section>
 
-                <section aria-labelledby="whatsapp-bot-heading" className="rounded-xl border border-slate-300 bg-white p-4">
+                <section aria-labelledby="whatsapp-bot-heading" className="rounded-xl border border-ink/15 bg-white p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h3 id="whatsapp-bot-heading" className="text-sm font-bold text-slate-950">WhatsApp bot</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-700">No WhatsApp bot is connected to this app yet. A real connection needs a WhatsApp Business Platform number, verified webhook, and server-side credentials.</p>
+                      <h3 id="whatsapp-bot-heading" className="text-sm font-bold text-ink">WhatsApp bot</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-ink-muted">No WhatsApp bot is connected to this app yet. A real connection needs a WhatsApp Business Platform number, verified webhook, and server-side credentials.</p>
                     </div>
-                    <span className="shrink-0 rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">Not connected</span>
+                    <span className="shrink-0 rounded-full border border-ink/15 bg-paper px-2.5 py-1 text-xs font-semibold text-ink">Not connected</span>
                   </div>
                 </section>
 
@@ -2016,52 +2206,54 @@ export default function SachPrismHome() {
             ) : (
               <section aria-labelledby="standards-heading" className="space-y-5">
                 <div>
-                  <h2 id="standards-heading" className="text-lg font-bold text-slate-950">How to read a check</h2>
-                  <p className="mt-1 text-sm text-slate-700">SachPrism separates what its evidence can support from what still needs a human decision.</p>
+                  <h2 id="standards-heading" className="text-lg font-bold text-ink">How to read a check</h2>
+                  <p className="mt-1 text-sm text-ink-muted">SachPrism separates what its evidence can support from what still needs a human decision.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <article className="rounded-lg border border-emerald-300 bg-emerald-50 p-4">
                     <h3 className="text-sm font-bold text-emerald-950">Source-verified</h3>
                     <p className="mt-1 text-sm leading-relaxed text-emerald-950">Live web search returned source material. Open the citations and judge whether they support the claim.</p>
                   </article>
-                  <article className="rounded-lg border border-slate-300 bg-slate-50 p-4">
-                    <h3 className="text-sm font-bold text-slate-950">AI assessment</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-800">Live source-checking was unavailable. This is a cautious model assessment, not a verified finding.</p>
+                  <article className="rounded-lg border border-ink/15 bg-paper p-4">
+                    <h3 className="text-sm font-bold text-ink">AI assessment</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-ink">Live source-checking was unavailable. This is a cautious model assessment, not a verified finding.</p>
                   </article>
                 </div>
-                <article className="rounded-lg border border-slate-200 bg-white p-4">
-                  <h3 className="text-sm font-bold text-slate-950">Risk score</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                <article className="rounded-lg border border-ink/10 bg-white p-4">
+                  <h3 className="text-sm font-bold text-ink">Risk score</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-muted">
                     The score is a triage signal, not a probability: false claims add 30, partly true claims add 15, detected tactics add up to 40, and verified claims subtract 10. The final score is clamped from 0 to 100.
                   </p>
                 </article>
-                <p className="text-xs leading-relaxed text-slate-700">Check important claims against primary sources. A verdict or score is not a substitute for medical, legal, or financial advice.</p>
+                <p className="text-xs leading-relaxed text-ink-muted">Check important claims against primary sources. A verdict or score is not a substitute for medical, legal, or financial advice.</p>
               </section>
             )}
+              </motion.div>
+            </AnimatePresence>
           </section>
         )}
 
         {!result && !isLoading && isCheckView && (
-          <section aria-labelledby="how-it-works-heading" className="space-y-3">
+          <section aria-labelledby="how-it-works-heading" className="space-y-4">
             <div className="flex items-center gap-3">
-              <h2 id="how-it-works-heading" className="text-sm font-bold text-slate-900 whitespace-nowrap">
+              <h2 id="how-it-works-heading" className="font-display whitespace-nowrap text-sm font-bold text-ink">
                 How it works
               </h2>
-              <div className="h-px flex-1 bg-slate-200" />
+              <div className="h-px flex-1 bg-ink/10" />
             </div>
-            <ol className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {[
                 ["01", "Add a forward", "Paste text or choose a screenshot, voice note, PDF, or link."],
                 ["02", "Find the claims", "SachPrism separates checkable facts from opinion and context."],
                 ["03", "Review the evidence", "See each assessment, confidence, and available sources."],
               ].map(([step, title, description]) => (
-                <li key={step} className="flex sm:flex-col gap-3 sm:gap-2 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-900">
+                <li key={step} className="sp-panel-interactive flex gap-3 p-4 sm:flex-col sm:gap-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft font-display text-xs font-bold text-accent-hover">
                     {step}
                   </span>
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-600">{description}</p>
+                    <h3 className="text-sm font-semibold text-ink">{title}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-ink-muted">{description}</p>
                   </div>
                 </li>
               ))}
@@ -2069,253 +2261,193 @@ export default function SachPrismHome() {
           </section>
         )}
 
-        {/* Loading State with 4 Animated Steps */}
         {isLoading && (
-          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-8 space-y-6 animate-loading-enter">
-            <div className="text-center space-y-1">
-              <div className="inline-flex p-3 rounded-full bg-indigo-50 text-indigo-800 animate-step-pulse mb-2">
-                <Sparkles className="w-6 h-6 animate-loading-mark" />
-              </div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-800">
+          <motion.section
+            className="sp-panel space-y-6 p-5 sm:p-8"
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            <div className="space-y-2 text-center">
+              <p className="sachprism-hero-kicker">Working</p>
+              <h2 className="font-display text-lg font-bold text-ink sm:text-xl">
                 Examining claims against verified sources
               </h2>
-              <p aria-live="polite" className="text-xs sm:text-sm font-medium text-indigo-800 min-h-5">
+              <p aria-live="polite" className="min-h-5 text-sm font-medium text-accent-hover">
                 {verifyingProgressText ||
                   (activeTab === "audio"
-                    ? "Transcribing voice note & checking facts with Google Search..."
+                    ? "Transcribing voice note and checking facts with live search…"
                     : activeTab === "pdf"
-                    ? "Reading PDF pages & checking claims with live web search..."
-                    : "Examining claims against official databases & live search...")}
+                    ? "Reading PDF pages and checking claims with live web search…"
+                    : "Examining claims against official databases and live search…")}
               </p>
             </div>
-
-            {/* Step progress list */}
-            <div className="space-y-3 max-w-md mx-auto pt-2">
+            <LoadingStepper
+              steps={LOADING_STEPS}
+              currentStepIndex={currentStepIndex}
+              verifyingProgressText={verifyingProgressText}
+              reduceMotion={Boolean(reduceMotion)}
+            />
+            <div className="mx-auto max-w-md space-y-2 sm:hidden">
               {LOADING_STEPS.map((step, idx) => {
-                const isCompleted = idx < currentStepIndex;
                 const isCurrent = idx === currentStepIndex;
-                const stepDesc =
-                  isCurrent && idx === 2 && verifyingProgressText.startsWith("Checking claim")
-                    ? verifyingProgressText
-                    : isCurrent && idx === 3 && verifyingProgressText.startsWith("Synthesizing")
-                    ? verifyingProgressText
-                    : step.desc;
-
+                if (!isCurrent) return null;
                 return (
-                  <div
-                    key={step.id}
-                    className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
-                      isCurrent
-                        ? "bg-indigo-50/60 border-indigo-200"
-                        : isCompleted
-                        ? "bg-slate-50/80 border-slate-200 text-slate-700"
-                        : "bg-slate-50 border-slate-200 text-slate-600"
-                    }`}
-                  >
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                        isCompleted
-                          ? "bg-emerald-600 text-white"
-                          : isCurrent
-                          ? "bg-indigo-700 text-white animate-pulse"
-                          : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
-                    </div>
-                    <div>
-                      <h3
-                        className={`text-xs sm:text-sm font-semibold ${
-                          isCurrent ? "text-indigo-950 font-bold" : "text-slate-800"
-                        }`}
-                      >
-                        {step.title}
-                      </h3>
-                      <p
-                        className={`text-xs ${
-                          isCurrent && (idx === 2 || idx === 3)
-                            ? "text-indigo-700 font-medium animate-pulse"
-                            : "text-slate-500"
-                        }`}
-                      >
-                        {stepDesc}
-                      </p>
-                    </div>
-                  </div>
+                  <p key={step.id} className="text-center text-xs text-ink-muted">
+                    <span className="font-semibold text-ink">{step.title}:</span> {step.desc}
+                  </p>
                 );
               })}
             </div>
-          </section>
+          </motion.section>
         )}
 
         {/* Results View */}
-        {result && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Top Overall Verdict Card */}
-            {(() => {
-              const badge = getOverallVerdictBadge(result.overall);
-              const riskScore = Math.max(0, Math.min(100, result.riskScore ?? 0));
-              const riskLevel =
-                result.riskLevel ||
-                (riskScore <= 30
-                  ? "Low risk"
-                  : riskScore <= 60
-                  ? "Moderate risk"
-                  : "High risk — likely to mislead");
-              const riskColor =
-                riskScore <= 30 ? "#15803d" : riskScore <= 60 ? "#b45309" : "#b91c1c";
-              return (
-                <div
-                  className={`rounded-2xl border p-5 sm:p-6 shadow-sm ${badge.bg}`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start sm:items-center gap-3.5">
-                      {badge.icon}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/70 border border-slate-300">
-                            Overall Assessment
-                          </span>
-                          <span className="text-xs text-slate-600 font-medium">
-                            Language: {result.detectedLanguage.toUpperCase()}
-                          </span>
-                        </div>
-                        <h2 className="text-xl sm:text-2xl font-black mt-1">
-                          {badge.title}
-                        </h2>
-                        <p className="text-xs sm:text-sm mt-0.5 opacity-90 max-w-xl">
-                          {badge.description}
-                        </p>
-                      </div>
-                    </div>
+        {result && (() => {
+          const badge = getOverallVerdictBadge(result.overall);
+          const riskScore = Math.max(0, Math.min(100, result.riskScore ?? 0));
+          const riskLevel =
+            result.riskLevel ||
+            (riskScore <= 30
+              ? "Low risk"
+              : riskScore <= 60
+              ? "Moderate risk"
+              : "High risk — likely to mislead");
 
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={handleCopySummary}
-                        className="px-3 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition shadow-xs flex items-center gap-1.5"
-                      >
-                        {copiedSummary ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5 text-slate-500" />
-                            <span>Copy summary</span>
-                          </>
-                        )}
-                      </button>
+          return (
+            <motion.div
+              className="space-y-8"
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <RiskGauge
+                score={riskScore}
+                level={riskLevel}
+                reduceMotion={Boolean(reduceMotion)}
+              />
 
-                      {/* Download as image (WhatsApp card 1080x1350) */}
-                      <button
-                        type="button"
-                        onClick={handleDownloadShareCard}
-                        disabled={isDownloadingCard}
-                        className="px-3 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
-                        title="Download 1080x1350 shareable image for WhatsApp"
-                      >
-                        <Download className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>{isDownloadingCard ? "Generating..." : "Download card"}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleDownloadCertificate}
-                        disabled={!qrCodeGenerated || isDownloadingCertificate}
-                        title={
-                          qrCodeLibraryFailed
-                            ? "The QR code library could not be loaded"
-                            : "Download a QR-encoded proof of check"
-                        }
-                        className="px-3 py-2 text-xs font-semibold rounded-xl bg-white border border-indigo-300 text-indigo-900 hover:bg-indigo-50 transition shadow-xs flex items-center gap-1.5 disabled:cursor-wait disabled:opacity-60"
-                      >
-                        <ShieldCheck className="w-3.5 h-3.5 text-indigo-800" />
-                        <span>
-                          {isDownloadingCertificate
-                            ? "Generating certificate..."
-                            : qrCodeLibraryFailed
-                            ? "Certificate unavailable"
-                            : "Generate verification certificate"}
-                        </span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleReset}
-                        className="px-3 py-2 text-xs font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition shadow-xs flex items-center gap-1.5"
-                      >
-                        <RefreshCw className="w-3.5 h-3.5" />
-                        <span>Check another</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center gap-4 rounded-xl border border-slate-200 bg-white/90 p-3 sm:p-4">
-                    <div
-                      role="meter"
-                      aria-label="Risk score"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={riskScore}
-                      aria-valuetext={`${riskScore} out of 100, ${riskLevel}`}
-                      className="grid h-20 w-20 shrink-0 place-items-center rounded-full p-1.5"
-                      style={{
-                        background: `conic-gradient(${riskColor} 0 ${riskScore}%, #e2e8f0 ${riskScore}% 100%)`,
-                      }}
+              <motion.section
+                className={`p-6 sm:p-8 ${badge.bg}`}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.97, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex min-w-0 items-start gap-4">
+                    <motion.div
+                      initial={reduceMotion ? false : { scale: 0.85, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 380, damping: 24, delay: 0.12 }}
                     >
-                      <div className="grid h-full w-full place-content-center rounded-full bg-white text-center">
-                        <span className="text-2xl font-black leading-none text-slate-950">{riskScore}</span>
-                        <span className="mt-0.5 text-[10px] font-bold uppercase text-slate-700">of 100</span>
-                      </div>
-                    </div>
+                      {badge.icon}
+                    </motion.div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold uppercase tracking-wide text-slate-700">Forward risk</p>
-                      <p className="mt-1 text-base font-bold" style={{ color: riskColor }}>{riskLevel}</p>
-                      <p className="mt-0.5 text-xs text-slate-700">Based on claim verdicts and detected tactics.</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-ink/10 bg-paper-elevated/80 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                          Overall assessment
+                        </span>
+                        <span className="text-xs font-medium text-ink-soft">
+                          Language: {result.detectedLanguage.toUpperCase()}
+                        </span>
+                      </div>
+                      <h2 className="font-display mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+                        {badge.title}
+                      </h2>
+                      <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-90">{badge.description}</p>
                     </div>
                   </div>
 
-                  {/* Manipulation Tags Chips */}
-                  {result.manipulationTags && result.manipulationTags.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-slate-200/60">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs font-semibold text-slate-600 mr-1">
-                          Emotional Tactics Detected:
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopySummary}
+                      className="sp-btn-secondary min-h-10"
+                    >
+                      {copiedSummary ? (
+                        <span className={`inline-flex items-center gap-1.5 copy-pop text-[var(--verdict-safe)]`}>
+                          <Check className="h-3.5 w-3.5" />
+                          Copied!
                         </span>
-                        {result.manipulationTags.map((tag, idx) => {
-                          const formatted = formatTag(tag);
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white/80 border border-slate-300 text-slate-700 shadow-2xs"
-                            >
-                              <span>{formatted.icon}</span>
-                              <span>{formatted.label}</span>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5 text-ink-soft" />
+                          Copy summary
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadShareCard}
+                      disabled={isDownloadingCard}
+                      className="sp-btn-secondary min-h-10 disabled:opacity-50"
+                      title="Download 1080x1350 shareable image for WhatsApp"
+                    >
+                      <Download className="h-3.5 w-3.5 text-accent" />
+                      {isDownloadingCard ? "Generating…" : "Download card"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadCertificate}
+                      disabled={!qrCodeGenerated || isDownloadingCertificate}
+                      title={
+                        qrCodeLibraryFailed
+                          ? "The QR code library could not be loaded"
+                          : "Download a QR-encoded proof of check"
+                      }
+                      className="sp-btn-secondary min-h-10 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5 text-accent-hover" />
+                      {isDownloadingCertificate
+                        ? "Generating…"
+                        : qrCodeLibraryFailed
+                        ? "Certificate unavailable"
+                        : "Verification certificate"}
+                    </button>
+                    <button type="button" onClick={handleReset} className="sp-btn-primary min-h-10">
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Check another
+                    </button>
+                  </div>
                 </div>
-              );
-            })()}
+              </motion.section>
 
-            {/* Audio Transcript Card (when audio was uploaded) */}
+              {result.manipulationTags && result.manipulationTags.length > 0 && (
+                <motion.section
+                  className="sp-panel p-4 sm:p-5"
+                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: 0.14 }}
+                >
+                  <p className="text-xs font-bold uppercase tracking-wider text-ink-soft">
+                    Persuasion tactics detected
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {result.manipulationTags.map((tag, idx) => {
+                      const formatted = formatTag(tag);
+                      return (
+                        <span key={idx} className="manipulation-chip">
+                          <span>{formatted.icon}</span>
+                          <span>{formatted.label}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </motion.section>
+              )}
+
             {result.transcript && (
-              <div className="bg-white rounded-2xl border border-indigo-200 p-4 sm:p-5 shadow-xs space-y-2">
+              <div className="sp-panel space-y-2 p-4 sm:p-5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Mic className="w-3.5 h-3.5 text-indigo-600" />
+                  <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                    <Mic className="w-3.5 h-3.5 text-accent" />
                     Transcribed Voice Note
                   </h3>
-                  <span className="text-xs text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                  <span className="text-xs text-accent-hover font-semibold bg-accent-soft px-2 py-0.5 rounded border border-accent/20">
                     Auto-transcribed with Gemini
                   </span>
                 </div>
-                <div className="text-sm text-slate-800 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200 italic">
+                <div className="text-sm text-ink leading-relaxed bg-paper p-3.5 rounded-xl border border-ink/10 italic">
                   &ldquo;{renderHighlightedText(result.transcript, result.claims)}&rdquo;
                 </div>
               </div>
@@ -2323,39 +2455,39 @@ export default function SachPrismHome() {
 
             {/* Original Text with Highlighted Wrong Part (when text was input) */}
             {activeTab === "text" && textContent.trim() && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-2">
+              <div className="sp-panel space-y-2 p-4 sm:p-5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-slate-500" />
+                  <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-ink-soft" />
                     Original Forward with Inaccuracies Highlighted
                   </h3>
                   <span className="text-xs text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
                     Red dashed = Disputed/False phrase
                   </span>
                 </div>
-                <div className="text-sm text-slate-800 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div className="text-sm text-ink leading-relaxed bg-paper p-3.5 rounded-xl border border-ink/10">
                   {renderHighlightedText(textContent, result.claims)}
                 </div>
               </div>
             )}
 
-            {/* Claims Breakdown List */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  Detailed Claim Verification ({result.claims.length})
+            <section className="space-y-4" aria-labelledby="claims-heading">
+              <div className="flex items-center justify-between gap-4">
+                <h3 id="claims-heading" className="font-display text-base font-bold tracking-tight text-ink sm:text-lg">
+                  Claim-by-claim verification ({result.claims.length})
                 </h3>
-                <span className="text-xs text-slate-500">
-                  Grounded with Google Search
-                </span>
+                <span className="text-xs font-medium text-ink-soft">Grounded with Google Search</span>
               </div>
 
               {result.claims.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center text-slate-600 text-sm">
-                  No check-worthy factual claims could be extracted from this message.
+                <div className="sp-empty-state py-10">
+                  <HelpCircle className="h-10 w-10 text-ink-soft" />
+                  <p className="text-sm text-ink-muted">
+                    No check-worthy factual claims could be extracted from this message.
+                  </p>
                 </div>
               ) : (
-                result.claims.map((claim) => {
+                result.claims.map((claim, claimIndex) => {
                   const style = getVerdictStyle(claim.verdict);
                   const isExpanded = Boolean(expandedEvidence[claim.id]);
                   const confidencePct = Math.round(claim.confidence * 100);
@@ -2363,19 +2495,29 @@ export default function SachPrismHome() {
                   const timesChecked = claim.timesChecked ?? 0;
 
                   return (
-                    <article
+                    <motion.article
                       key={claim.id}
-                      className={`bg-white rounded-2xl border ${style.border} shadow-xs p-5 sm:p-6 space-y-4 transition-all`}
+                      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.38,
+                        delay: reduceMotion ? 0 : claimIndex * 0.1,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className={`sp-panel-interactive border ${style.border} p-5 sm:p-6 space-y-4`}
                     >
                       {/* Claim Header & Verdict Badge */}
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${style.badge}`}
+                            <motion.span
+                              initial={reduceMotion ? false : { opacity: 0, scale: 0.88 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.05 + claimIndex * 0.1 }}
+                              className={`verdict-pill border ${style.badge}`}
                             >
                               {style.label}
-                            </span>
+                            </motion.span>
                             {claim.liveVerified ? (
                               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-300">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -2383,37 +2525,37 @@ export default function SachPrismHome() {
                               </span>
                             ) : (
                               <span
-                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-300"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-muted bg-paper px-2 py-0.5 rounded-full border border-ink/15"
                                 title="Assessed using Gemini general knowledge when live search is unavailable"
                               >
-                                <Sparkles className="w-3 h-3 text-slate-500" />
+                                <Sparkles className="w-3 h-3 text-ink-soft" />
                                 <span>AI assessment</span>
                               </span>
                             )}
                             {claim.category && (
-                              <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+                              <span className="text-xs text-ink-soft uppercase tracking-wider font-semibold">
                                 #{claim.category}
                               </span>
                             )}
                           </div>
-                          <h4 className="text-base font-semibold text-slate-900 pt-1 leading-snug">
+                          <h4 className="text-base font-semibold text-ink pt-1 leading-snug">
                             &ldquo;{claim.claim}&rdquo;
                           </h4>
                         </div>
 
                         {/* Confidence Meter */}
-                        <div className="sm:text-right shrink-0 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 self-start sm:self-auto">
-                          <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+                        <div className="sm:text-right shrink-0 bg-paper px-3 py-1.5 rounded-xl border border-ink/10 self-start sm:self-auto">
+                          <div className="text-[11px] text-ink-soft font-semibold uppercase tracking-wider">
                             Confidence
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-2 w-16 overflow-hidden rounded-full bg-ink/10">
                               <div
                                 className={`h-full ${style.indicator}`}
                                 style={{ width: `${confidencePct}%` }}
                               />
                             </div>
-                            <span className="text-xs font-bold text-slate-800">
+                            <span className="text-xs font-bold text-ink">
                               {confidencePct}%
                             </span>
                           </div>
@@ -2422,7 +2564,7 @@ export default function SachPrismHome() {
 
                       {/* Explanation */}
                       <div className="space-y-1">
-                        <p className="text-sm text-slate-700 leading-relaxed font-normal">
+                        <p className="text-sm text-ink-muted leading-relaxed font-normal">
                           {claim.explanation}
                         </p>
                         {claim.tactic?.label && claim.tactic.explanation && (
@@ -2438,7 +2580,7 @@ export default function SachPrismHome() {
                           </p>
                         )}
                         {timesChecked > 1 && (
-                          <p className="text-xs text-slate-700">
+                          <p className="text-xs text-ink-muted">
                             Checked {timesChecked} times
                             {timesChecked > 3 && (
                               <span className="ml-2 font-semibold text-amber-900">This forward is spreading</span>
@@ -2477,12 +2619,12 @@ export default function SachPrismHome() {
                                           setHistoryQuery(relatedClaim.claim);
                                         }
                                       }}
-                                      className="w-full rounded-md px-2 py-1.5 text-left hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700"
+                                      className="w-full rounded-md px-2 py-1.5 text-left hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                     >
                                       <span className="block break-words text-xs font-medium">{relatedClaim.claim}</span>
                                       <span className="mt-1 block text-[11px] text-amber-900">
                                         {relatedClaim.verdict} · {Math.round(relatedClaim.similarity * 100)}% similar
-                                        <span className="ml-2 font-semibold text-indigo-800 underline">
+                                        <span className="ml-2 font-semibold text-accent-hover underline">
                                           {relatedHistoryEntry ? "View earlier result" : "Find in history"}
                                         </span>
                                       </span>
@@ -2496,10 +2638,10 @@ export default function SachPrismHome() {
                       </div>
 
                       {/* What to do Card */}
-                      <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-start gap-2.5">
-                        <Info className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                        <div className="text-xs text-slate-700">
-                          <span className="font-bold text-slate-900">
+                      <div className="flex items-start gap-2.5 rounded-xl border border-ink/10 bg-paper p-3">
+                        <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                        <div className="text-xs text-ink-muted">
+                          <span className="font-bold text-ink">
                             What to do:
                           </span>{" "}
                           {claim.whatToDo}
@@ -2507,14 +2649,14 @@ export default function SachPrismHome() {
                       </div>
 
                       {/* Actions: Expand Sources, Listen button & Copy Reply */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                      <div className="flex flex-col justify-between gap-3 border-t border-ink/10 pt-2 sm:flex-row sm:items-center">
                         {/* Expand Evidence Button */}
                         <div>
                           {claim.sources && claim.sources.length > 0 ? (
                             <button
                               type="button"
                               onClick={() => toggleEvidence(claim.id)}
-                              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 py-1"
+                              className="text-xs font-semibold text-accent hover:text-accent-hover flex items-center gap-1 py-1"
                             >
                               <span>
                                 {isExpanded ? "Hide" : "Show"} Evidence & Sources (
@@ -2527,7 +2669,7 @@ export default function SachPrismHome() {
                               )}
                             </button>
                           ) : (
-                            <span className="text-xs text-slate-400 italic">
+                            <span className="text-xs text-ink-soft italic">
                               No web citations available (unverified)
                             </span>
                           )}
@@ -2545,8 +2687,8 @@ export default function SachPrismHome() {
                             }
                             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
                               isSpeaking
-                                ? "bg-indigo-600 text-white shadow-xs animate-pulse"
-                                : "bg-slate-100 hover:bg-slate-200 text-slate-800"
+                                ? "bg-accent text-white shadow-xs animate-pulse"
+                                : "bg-paper hover:bg-paper-elevated text-ink"
                             }`}
                             title="Listen to this explanation (speech synthesis)"
                           >
@@ -2557,7 +2699,7 @@ export default function SachPrismHome() {
                               </>
                             ) : (
                               <>
-                                <Volume2 className="w-3.5 h-3.5 text-slate-500" />
+                                <Volume2 className="w-3.5 h-3.5 text-ink-soft" />
                                 <span>Listen</span>
                               </>
                             )}
@@ -2567,18 +2709,16 @@ export default function SachPrismHome() {
                           <button
                             type="button"
                             onClick={() => handleCopyReply(claim)}
-                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 transition flex items-center gap-1.5"
+                            className="sp-btn-secondary min-h-9 px-3 py-1.5 text-xs"
                           >
                             {copiedClaimId === claim.id ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                <span className="text-emerald-700">
-                                  Reply copied!
-                                </span>
-                              </>
+                              <span className="copy-pop inline-flex items-center gap-1.5 text-[var(--verdict-safe)]">
+                                <Check className="h-3.5 w-3.5" />
+                                Reply copied!
+                              </span>
                             ) : (
                               <>
-                                <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                <Copy className="w-3.5 h-3.5 text-ink-soft" />
                                 <span>Copy reply to sender</span>
                               </>
                             )}
@@ -2588,8 +2728,8 @@ export default function SachPrismHome() {
 
                       {/* Expandable Evidence Sources List */}
                       {isExpanded && claim.sources && claim.sources.length > 0 && (
-                        <div className="mt-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                          <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <div className="mt-3 p-3.5 bg-paper rounded-xl border border-ink/10 space-y-2">
+                          <h5 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
                             Verified Web Evidence
                           </h5>
                           <ul className="space-y-1.5">
@@ -2599,7 +2739,7 @@ export default function SachPrismHome() {
                                   href={source.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-medium break-all"
+                                  className="text-accent hover:text-accent-hover hover:underline flex items-center gap-1 font-medium break-all"
                                 >
                                   <ExternalLink className="w-3 h-3 shrink-0" />
                                   <span>{source.title || source.url}</span>
@@ -2609,13 +2749,14 @@ export default function SachPrismHome() {
                           </ul>
                         </div>
                       )}
-                    </article>
+                    </motion.article>
                   );
                 })
               )}
-            </div>
-          </div>
-        )}
+            </section>
+          </motion.div>
+          );
+        })()}
       </main>
 
       {/* Offscreen WhatsApp Share Card (1080x1350 px, 4:5 ratio) */}
@@ -2624,7 +2765,7 @@ export default function SachPrismHome() {
           <div
             ref={shareCardRef}
             style={{ width: "1080px", height: "1350px" }}
-            className="bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white p-16 flex flex-col justify-between font-sans select-none"
+            className="bg-gradient-to-b from-ink-surface via-ink-surface to-ink-surface text-white p-16 flex flex-col justify-between font-sans select-none"
           >
             {/* Share Card Header */}
             <div>
@@ -2633,14 +2774,14 @@ export default function SachPrismHome() {
                   <SachPrismMark className="h-16 w-16 rounded-2xl shadow-lg" />
                   <div>
                     <h2 className="text-4xl font-extrabold tracking-tight">SachPrism</h2>
-                    <p className="text-lg text-indigo-200 font-medium">Don&apos;t just forward. Verify.</p>
+                    <p className="text-lg text-white/70 font-medium">Don&apos;t just forward. Verify.</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm uppercase tracking-widest text-slate-400 font-semibold">
+                  <span className="text-sm uppercase tracking-widest text-ink-soft font-semibold">
                     Fact-Check Verification
                   </span>
-                  <p className="text-base text-slate-300">
+                  <p className="text-base text-ink-soft">
                     {new Date().toLocaleDateString("en-IN", { dateStyle: "long" })}
                   </p>
                 </div>
@@ -2648,7 +2789,7 @@ export default function SachPrismHome() {
 
               {/* Big Overall Verdict Block */}
               <div className="mt-10 p-10 rounded-3xl bg-white/10 border border-white/20 backdrop-blur-md">
-                <div className="text-xs uppercase tracking-widest text-indigo-300 font-bold mb-2">
+                <div className="text-xs uppercase tracking-widest text-accent-soft font-bold mb-2">
                   VERDICT SUMMARY
                 </div>
                 <h1
@@ -2663,7 +2804,7 @@ export default function SachPrismHome() {
                 {/* Emotional / Pressure Tactics */}
                 {result.manipulationTags && result.manipulationTags.length > 0 && (
                   <div className="mt-6 pt-6 border-t border-white/15 flex items-center gap-3 flex-wrap">
-                    <span className="text-sm font-semibold text-slate-300">
+                    <span className="text-sm font-semibold text-ink-soft">
                       Tactics Detected:
                     </span>
                     {result.manipulationTags.map((tag, idx) => (
@@ -2681,7 +2822,7 @@ export default function SachPrismHome() {
 
             {/* Claims Highlight */}
             <div className="space-y-6">
-              <div className="text-sm uppercase tracking-widest text-slate-400 font-bold border-b border-white/15 pb-2">
+              <div className="text-sm uppercase tracking-widest text-ink-soft font-bold border-b border-white/15 pb-2">
                 Key Findings ({result.claims.length} claims verified)
               </div>
               <div className="space-y-4">
@@ -2708,10 +2849,10 @@ export default function SachPrismHome() {
                         {claim.verdict}
                       </span>
                     </div>
-                    <p className="text-base text-slate-300 leading-snug">
+                    <p className="text-base text-ink-soft leading-snug">
                       {claim.explanation}
                     </p>
-                    <p className="text-sm text-indigo-300 font-medium">
+                    <p className="text-sm text-accent-soft font-medium">
                       💡 Action: {claim.whatToDo}
                     </p>
                   </div>
@@ -2720,12 +2861,12 @@ export default function SachPrismHome() {
             </div>
 
             {/* Share Card Footer */}
-            <div className="border-t border-white/20 pt-8 flex items-center justify-between text-slate-400 text-base">
+            <div className="border-t border-white/20 pt-8 flex items-center justify-between text-ink-soft text-base">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-400" />
+                <Sparkles className="w-5 h-5 text-accent/80" />
                 <span>Grounded with Google Search • Reviewed by SachPrism</span>
               </div>
-              <span className="text-slate-300 font-semibold">
+              <span className="text-ink-soft font-semibold">
                 Stop the spread. Verify before forwarding.
               </span>
             </div>
@@ -2749,18 +2890,18 @@ export default function SachPrismHome() {
           <div
             ref={certificateRef}
             style={{ width: "720px", height: "900px" }}
-            className="flex flex-col justify-between bg-white p-12 font-sans text-slate-950"
+            className="flex flex-col justify-between bg-white p-12 font-sans text-ink"
           >
             <div>
-              <div className="flex items-center justify-between border-b-2 border-slate-200 pb-6">
+              <div className="flex items-center justify-between border-b-2 border-ink/10 pb-6">
                 <div className="flex items-center gap-4">
                   <SachPrismMark className="h-14 w-14 rounded-xl" />
                   <div>
                     <p className="text-2xl font-black">SachPrism</p>
-                    <p className="text-sm font-medium text-slate-700">Proof of check</p>
+                    <p className="text-sm font-medium text-ink-muted">Proof of check</p>
                   </div>
                 </div>
-                <p className="text-right text-sm font-semibold text-slate-700">
+                <p className="text-right text-sm font-semibold text-ink-muted">
                   {new Date(resultCheckedAt ?? Date.now()).toLocaleDateString("en-IN", {
                     dateStyle: "long",
                   })}
@@ -2768,40 +2909,40 @@ export default function SachPrismHome() {
               </div>
 
               <div className="mt-10">
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Claim excerpt</p>
-                <p className="mt-3 text-2xl font-semibold leading-snug text-slate-950">
+                <p className="text-xs font-bold uppercase tracking-widest text-ink-muted">Claim excerpt</p>
+                <p className="mt-3 text-2xl font-semibold leading-snug text-ink">
                   {result.claims[0]?.claim || "No claim text was available."}
                 </p>
               </div>
 
               <div className="mt-8 flex items-center gap-3">
-                <span className="rounded-full border border-indigo-300 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-950">
+                <span className="rounded-full border border-accent/30 bg-accent-soft px-4 py-2 text-sm font-bold text-ink">
                   {result.claims[0]?.verdict || result.overall}
                 </span>
-                <span className="text-sm font-semibold text-slate-700">{result.overall}</span>
+                <span className="text-sm font-semibold text-ink-muted">{result.overall}</span>
               </div>
 
-              <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Risk score</p>
-                <p className="mt-1 text-4xl font-black text-slate-950">
-                  {result.riskScore}<span className="ml-1 text-lg font-bold text-slate-600">/100</span>
+              <div className="mt-8 rounded-xl border border-ink/10 bg-paper p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-ink-muted">Risk score</p>
+                <p className="mt-1 text-4xl font-black text-ink">
+                  {result.riskScore}<span className="ml-1 text-lg font-bold text-ink-muted">/100</span>
                 </p>
-                <p className="mt-1 text-sm font-semibold text-slate-700">{result.riskLevel}</p>
+                <p className="mt-1 text-sm font-semibold text-ink-muted">{result.riskLevel}</p>
               </div>
             </div>
 
-            <div className="flex items-end justify-between gap-6 border-t-2 border-slate-200 pt-6">
+            <div className="flex items-end justify-between gap-6 border-t-2 border-ink/10 pt-6">
               <div>
-                <p className="text-sm font-bold text-slate-900">Scan for the text summary</p>
-                <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-700">
+                <p className="text-sm font-bold text-ink">Scan for the text summary</p>
+                <p className="mt-1 max-w-sm text-xs leading-relaxed text-ink-muted">
                   This QR contains the claim verdicts, overall verdict, risk score, and date checked.
                 </p>
-                <p className="mt-5 text-sm font-semibold text-slate-800">Don&apos;t just forward. Verify.</p>
+                <p className="mt-5 text-sm font-semibold text-ink">Don&apos;t just forward. Verify.</p>
               </div>
               <div
                 ref={certificateQrRef}
                 aria-label="QR code containing the verification summary"
-                className="grid h-[210px] w-[210px] shrink-0 place-items-center rounded-lg border border-slate-300 bg-white p-2"
+                className="grid h-[210px] w-[210px] shrink-0 place-items-center rounded-lg border border-ink/15 bg-white p-2"
               />
             </div>
           </div>
@@ -2809,8 +2950,8 @@ export default function SachPrismHome() {
       )}
 
       {/* Footer */}
-      <footer className="mt-10 pt-6 border-t border-slate-200 text-center text-xs text-slate-600 space-y-2">
-        <p className="text-sm font-semibold text-slate-800">
+      <footer className="mt-10 pt-6 border-t border-ink/10 text-center text-xs text-ink-muted space-y-2">
+        <p className="text-sm font-semibold text-ink">
           AI can make mistakes. Always verify important decisions.
         </p>
         <p>
@@ -2824,6 +2965,6 @@ export default function SachPrismHome() {
       </footer>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
