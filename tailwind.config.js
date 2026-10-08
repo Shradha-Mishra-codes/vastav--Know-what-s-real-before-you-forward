@@ -9,22 +9,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "rgb(var(--background-rgb, 238 241 246) / <alpha-value>)",
+        foreground: "rgb(var(--foreground-rgb, 15 28 46) / <alpha-value>)",
         ink: {
-          DEFAULT: "var(--ink)",
-          muted: "var(--ink-muted)",
-          soft: "var(--ink-soft)",
-          surface: "var(--ink-surface)",
+          DEFAULT: "rgb(var(--ink-rgb, 12 24 41) / <alpha-value>)",
+          muted: "rgb(var(--ink-muted-rgb, 61 79 102) / <alpha-value>)",
+          soft: "rgb(var(--ink-soft-rgb, 92 109 130) / <alpha-value>)",
+          surface: "rgb(var(--ink-surface-rgb, 21 34 56) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          hover: "var(--accent-hover)",
-          soft: "var(--accent-soft)",
+          DEFAULT: "rgb(var(--accent-rgb, 217 120 82) / <alpha-value>)",
+          hover: "rgb(var(--accent-hover-rgb, 194 100 63) / <alpha-value>)",
+          soft: "rgb(var(--accent-soft-rgb, 252 232 223) / <alpha-value>)",
           ring: "var(--accent-ring)",
         },
-        paper: "var(--paper)",
-        "paper-elevated": "var(--paper-elevated)",
+        paper: "rgb(var(--paper-rgb, 248 249 252) / <alpha-value>)",
+        "paper-elevated": "rgb(var(--paper-elevated-rgb, 255 255 255) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["var(--font-body)", "system-ui", "sans-serif"],

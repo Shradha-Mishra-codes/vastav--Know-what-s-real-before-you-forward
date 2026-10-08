@@ -23,7 +23,7 @@
     "sources": [],
     "liveVerified": false,
     "tactic": null,
-    "timesChecked": 1,
+    "timesChecked": 2,
     "originalClaim": "A new government benefit was announced.",
     "timestamp": 1790951499410
   },
@@ -256,8 +256,24 @@
     },
     "language": "Hindi",
     "originalClaim": "Every household can claim a payment by registering online.",
-    "timestamp": 1790954600353,
-    "timesChecked": 1
+    "timestamp": 1791279276232,
+    "timesChecked": 1,
+    "languageResults": {
+      "english": {
+        "verdict": "UNVERIFIABLE",
+        "confidence": 0.3,
+        "explanation": "Without a specific country, region, or program name, this broad claim cannot be verified. Be cautious, as universal payment offers requiring online registration are frequently phishing scams. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+        "wrongPart": null,
+        "whatToDo": "Do not share personal information online and verify any scheme directly through official government websites.",
+        "replyToSender": "Which country or official government department is offering this payment?",
+        "sources": [],
+        "liveVerified": false,
+        "tactic": {
+          "label": "Phishing Bait",
+          "explanation": "The claim uses the promise of an easy, universal financial payout to encourage people to register on unverified online platforms."
+        }
+      }
+    }
   },
   "adfaf247699b45fa0654b8e1b98a10261d610f65b3f501744e7bc45b64d206d6": {
     "verdict": "UNVERIFIABLE",
@@ -316,8 +332,21 @@
     "tactic": null,
     "language": "Marathi",
     "originalClaim": "The Department of Public Services has scheduled water supply maintenance in Riverside, Maplewood, and Oakridge from May 12, 2025, to May 18, 2025.",
-    "timestamp": 1791034883824,
-    "timesChecked": 1
+    "timestamp": 1791279652363,
+    "timesChecked": 1,
+    "languageResults": {
+      "english": {
+        "verdict": "UNVERIFIABLE",
+        "confidence": 0.3,
+        "explanation": "This local municipal maintenance schedule cannot be confirmed without access to specific local government announcements. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+        "wrongPart": null,
+        "whatToDo": "Check your local municipality's official website or contact their utility department directly to verify past or scheduled maintenance.",
+        "replyToSender": "Could you please provide a link or official source for this maintenance notice?",
+        "sources": [],
+        "liveVerified": false,
+        "tactic": null
+      }
+    }
   },
   "df97350b670687cba5029dce96325ef61b9288f4c381c328ff3eb1e78f3691e4": {
     "verdict": "UNVERIFIABLE",
@@ -331,8 +360,21 @@
     "tactic": null,
     "language": "Marathi",
     "originalClaim": "There may be temporary disruptions to the water supply during the scheduled maintenance period.",
-    "timestamp": 1791034907140,
-    "timesChecked": 1
+    "timestamp": 1791279792720,
+    "timesChecked": 1,
+    "languageResults": {
+      "english": {
+        "verdict": "UNVERIFIABLE",
+        "confidence": 0.3,
+        "explanation": "This claim is a generic advisory regarding localized water maintenance and cannot be verified without specific details about the location, date, and utility provider. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+        "wrongPart": null,
+        "whatToDo": "Check your local water utility's official website or social media channels for specific service alerts.",
+        "replyToSender": "Could you please specify which water utility or location this maintenance notice is referring to?",
+        "sources": [],
+        "liveVerified": false,
+        "tactic": null
+      }
+    }
   },
   "27ff99aa6acd592d5be2d87aad14890fab3b94f870954b0d3b8a5f0f5b1be19d": {
     "verdict": "UNVERIFIABLE",
@@ -452,6 +494,256 @@
     "language": "English",
     "originalClaim": "The NMMS 2026-27 district verification deadline is November 30.",
     "timestamp": 1791036650267,
+    "timesChecked": 1
+  },
+  "f6e846736911526ce51760cf0b8c44ba99c32df19165d3ce96af49d553d3c80d": {
+    "verdict": "FALSE",
+    "confidence": 0.4,
+    "explanation": "Scientific consensus from global health authorities, including the World Health Organization, confirms that 5G radio waves cannot transmit viruses. COVID-19 is spread through respiratory droplets, not electromagnetic signals. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": "5G towers cause COVID",
+    "whatToDo": "Consult reputable health organizations like the WHO or CDC for accurate information on how viruses spread.",
+    "replyToSender": "Scientific evidence shows that 5G networks cannot transmit viruses like COVID-19, which spreads through respiratory droplets.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": {
+      "label": "Conspiracy Theory",
+      "explanation": "It falsely links two unrelated phenomena—5G technology deployment and a viral pandemic—to create a fear-based narrative."
+    },
+    "language": "English",
+    "originalClaim": "5G towers cause COVID",
+    "timestamp": 1791273959634,
+    "timesChecked": 1
+  },
+  "5497c508f10b9e04edd2d07708a3b47347b4124862a4840b0644f4a1d3db62c3": {
+    "verdict": "FALSE",
+    "confidence": 0.4,
+    "explanation": "COVID-19 is caused by the SARS-CoV-2 virus, which spreads through respiratory droplets. 5G mobile networks rely on non-ionizing radio waves and cannot transmit viruses or cause infectious diseases. Note: Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": "5G towers cause COVID-19",
+    "whatToDo": "Refer to official health guidelines from the WHO or CDC regarding COVID-19 transmission.",
+    "replyToSender": "Scientific consensus and global health organizations have thoroughly debunked the claim that 5G towers cause COVID-19, confirming that the virus is biologically transmitted.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": {
+      "label": "False Cause",
+      "explanation": "The claim incorrectly links the rollout of 5G technology to the outbreak of a biological virus without any scientific evidence."
+    },
+    "language": "English",
+    "originalClaim": "5G towers cause COVID-19.",
+    "timestamp": 1791274029679,
+    "timesChecked": 1
+  },
+  "bb6a94abcccc5ec3f20bba2952f6006ddee5b3c8bfd04a104fd01b3712b49528": {
+    "verdict": "FALSE",
+    "confidence": 0.4,
+    "explanation": "Drinking warm water does not kill viruses in the throat or prevent viral infections. While staying hydrated is healthy, water cannot wash away or destroy viruses already infecting respiratory cells. Note that live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": "Drinking warm water every 15 minutes kills viruses in a person's throat",
+    "whatToDo": "Consult healthcare professionals for evidence-based medical advice and maintain hygiene practices like handwashing.",
+    "replyToSender": "This is actually a medical myth; drinking warm water does not kill or wash away viruses in the throat.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": {
+      "label": "Pseudoscience",
+      "explanation": "The claim presents a scientifically inaccurate and oversimplified home remedy as an effective medical cure."
+    },
+    "language": "English",
+    "originalClaim": "Drinking warm water every 15 minutes kills viruses in a person's throat.",
+    "timestamp": 1791274496262,
+    "timesChecked": 1
+  },
+  "7bee283680153dca3bd0ce7d36297f558ce2e402a3cc7715e781a006965cadbf": {
+    "verdict": "FALSE",
+    "confidence": 0.4,
+    "explanation": "Drinking warm water is good for hydration but does not prevent the flu. Influenza is a respiratory virus that enters through airway cells, and drinking water cannot wash it away to prevent infection. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": "prevents the flu",
+    "whatToDo": "Get an annual flu vaccine and practice good hand hygiene to prevent the flu.",
+    "replyToSender": "Drinking warm water keeps you hydrated, but medical experts state it does not prevent the flu.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": {
+      "label": "Pseudoscientific advice",
+      "explanation": "The claim presents a simple, scientifically unsupported health tip as an effective preventative measure."
+    },
+    "language": "English",
+    "originalClaim": "Drinking warm water every 15 minutes prevents the flu.",
+    "timestamp": 1791274519255,
+    "timesChecked": 1
+  },
+  "8d55af6c4c6dd63a983f6b7c99692e5342da14d094afc72fdb31ccc54c839b0b": {
+    "verdict": "VERIFIED",
+    "confidence": 0.4,
+    "explanation": "This is an established scientific fact. The Earth takes approximately 365.24 days to complete one full orbit around the Sun. Note: Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "No further action is needed as this is a well-established scientific fact.",
+    "replyToSender": "Yes, that is correct; Earth's orbital period is approximately 365.24 days.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "The Earth completes one orbit around the Sun in approximately 365 days.",
+    "timestamp": 1791274690071,
+    "timesChecked": 1
+  },
+  "652f485e1945307d0d9eb158f8547dd4e79a270c8ce844ff1e43a08e46d97d5d": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.35,
+    "explanation": "This claim lacks specific details such as the location, date, or water utility company performing the maintenance, making it impossible to confirm without specific context. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Check with your local water utility or municipal authority for specific service updates.",
+    "replyToSender": "Could you please share which city or water utility company this maintenance announcement is for?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "Essential services, such as hospitals and emergency facilities, will continue to receive uninterrupted water supply during the scheduled maintenance period.",
+    "timestamp": 1791452082742,
+    "timesChecked": 1,
+    "languageResults": {
+      "marathi": {
+        "verdict": "UNVERIFIABLE",
+        "confidence": 0.35,
+        "explanation": "हा दावा कोणत्या विशिष्ट क्षेत्रातील पाणी कपातीबद्दल आहे याचा स्पष्ट उल्लेख नाही, त्यामुळे याची पुष्टी करणे अशक्य आहे. लाइव्ह स्रोत तपासणी तात्पुरती अनुपलब्ध होती. सामान्य माहितीच्या आधारावर; थेट स्रोत-तपासणी तात्पुरती उपलब्ध नव्हती.",
+        "wrongPart": null,
+        "whatToDo": "तुमच्या स्थानिक पाणी पुरवठा विभागाकडून किंवा महानगरपालिकेकडून अधिकृत माहितीची खात्री करा.",
+        "replyToSender": "कृपया हा संदेश कोणत्या विशिष्ट भागासाठी आणि तारखेसाठी लागू आहे याची माहिती द्याल का?",
+        "sources": [],
+        "liveVerified": false,
+        "tactic": null
+      }
+    }
+  },
+  "bf5ac9ec12c8a6b526d0d201be7e8603ee2704f7ac600765c649fe60e36b64f8": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.35,
+    "explanation": "This contact information appears to contain placeholder details, such as a fictional '555' phone number. Without live database access, we cannot confirm if any active agency uses this specific website domain. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Verify the contact details directly on your local government's official '.gov' website.",
+    "replyToSender": "This looks like placeholder contact information; could you provide the official department website?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "The contact information for the Department of Public Services is www.publicservices.gov and (555) 123-4567.",
+    "timestamp": 1791279732608,
+    "timesChecked": 1
+  },
+  "b4d3ac0d0d01fcc70dcd1319f8ab497153186fd16554a37d5e5f8c107b0de8a9": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "This claim refers to a highly localized municipal maintenance schedule that cannot be confirmed without access to specific local government announcements. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Check your local city or Department of Public Services official website for active service advisories.",
+    "replyToSender": "Could you tell me which city or official source this water maintenance schedule is from?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "The Department of Public Services has scheduled water supply maintenance for Riverside, Maplewood, and Oakridge starting on May 12, 2025.",
+    "timestamp": 1791279747601,
+    "timesChecked": 1
+  },
+  "db16ec64d801f12a701398099257a32654f5b6291096ca1926dcfd4898bbaef3": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "This claim refers to a specific, localized utility schedule that cannot be confirmed without real-time local data. Please note that live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Check your local water utility company's official website or customer helpline for confirmation.",
+    "replyToSender": "Could you please specify which city or water utility provider this maintenance schedule is for?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "The scheduled water supply maintenance is expected to end on May 18, 2025.",
+    "timestamp": 1791279771969,
+    "timesChecked": 1
+  },
+  "6c9ffd08518ada9f399e5aab7f43492a1689d4c9d0bb4011a3578d08c6fad309": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "This claim details a specific student's enrollment and GPA, which is private academic information that cannot be verified without official university records. Note that live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Request an official transcript or university verification to confirm these academic details.",
+    "replyToSender": "I cannot verify this specific academic record without official documentation from the university.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "Shradha Mishra is pursuing a Bachelor of Technology in Computer Science and Technology at Usha Mittal Institute of Technology, SNDT Women's University, Mumbai, with a CGPA of 6.96.",
+    "timestamp": 1791446261224,
+    "timesChecked": 1
+  },
+  "2e75432dd1ea55a5b0c129ace8986850a9bbcf331fcbd10aeb39b4aae08c4e18": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "Whether Shradha Mishra holds the Oracle Cloud Infrastructure 2025 Certified Generative AI Professional credential cannot be confirmed without access to live certification registries or professional profiles. Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Verify the credential by asking for their official Oracle Credly badge link.",
+    "replyToSender": "Could you please share your official Oracle Credly badge or verification link to confirm this certification?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "Shradha Mishra is an Oracle Cloud Infrastructure 2025 Certified Generative AI Professional.",
+    "timestamp": 1791446282159,
+    "timesChecked": 1
+  },
+  "3fe18ccb7f5958aa232883eafb2ccc3e40f21dea754eaf2fe798e5ef3080267f": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "This appears to be a specific personal, academic, or hackathon AI project. Without active web search capabilities, we cannot verify the creator, project details, or its claimed accuracy rate. Note: Live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Search GitHub, LinkedIn, or academic databases for Shradha Mishra's AgriSmart AI project.",
+    "replyToSender": "Could you share a link, portfolio, or code repository for AgriSmart AI so I can learn more about it?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "Shradha Mishra built an AI project called AgriSmart AI using Python and multimodal AI that detects crop diseases with 90 percent accuracy.",
+    "timestamp": 1791446303973,
+    "timesChecked": 1
+  },
+  "f73241aa7ea876682ae08a44c2cc58c30761b6aeac4ce34a07886168f014a03f": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.35,
+    "explanation": "भारत सरकारच्या विशेष मोहिमेचे (Special Campaign) वार्षिक नियोजन पाहता २०२६ मध्ये 'विशेष मोहीम ६.०' ऑक्टोबर दरम्यान असणे शक्य आहे, पण थेट इंटरनेट पडताळणीअभावी याची खात्री करता येत नाही. सध्या थेट स्रोत तपासणी तात्पुरती अनुपलब्ध होती. सामान्य माहितीच्या आधारावर; थेट स्रोत-तपासणी तात्पुरती उपलब्ध नव्हती.",
+    "wrongPart": null,
+    "whatToDo": "अधिकृत माहितीसाठी कृपया भारत सरकारच्या DARPG च्या संकेतस्थळाला भेट द्या.",
+    "replyToSender": "या मोहिमेची अधिकृत घोषणा तपासण्यासाठी कृपया सरकारच्या संकेतस्थळावरील ताजी परिपत्रके पहा.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "Marathi",
+    "originalClaim": "The Government of India announced that Special Campaign 6.0 will run from 2 October to 31 October 2026.",
+    "timestamp": 1791451180327,
+    "timesChecked": 1
+  },
+  "f576ac19cd98346ac7bb7e77a408e1aa248941ffd57a110bd45500933c53ea48": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "ही माहिती अत्यंत विशिष्ट आणि स्थानिक स्वरूपाची आहे. थेट इंटरनेट सर्च उपलब्ध नसल्यामुळे मे २०२५ मधील या पाणीपुरवठा देखभालीच्या दाव्याची पुष्टी करता आली नाही. आमच्याकडे सध्या थेट स्रोत तपासण्याची सुविधा तात्पुरती उपलब्ध नव्हती. सामान्य माहितीच्या आधारावर; थेट स्रोत-तपासणी तात्पुरती उपलब्ध नव्हती.",
+    "wrongPart": null,
+    "whatToDo": "कृपया तुमच्या स्थानिक पाणीपुरवठा विभाग किंवा नगरपालिकेशी संपर्क साधून खात्री करा.",
+    "replyToSender": "या पाणीपुरवठा देखभालीच्या तारखांची पुष्टी करण्यासाठी कृपया अधिकृत स्थानिक सूचनेची तपासणी करा.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "Marathi",
+    "originalClaim": "Water supply maintenance is scheduled to take place from May 12, 2025, to May 18, 2025.",
+    "timestamp": 1791452036270,
+    "timesChecked": 1
+  },
+  "4389b1a36148fbe1fb45e6b98f6bad069d923bc98b497e59016063c9a3e4d791": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "रिव्हरसाइड, मॅपलवूड आणि ओकरिजमधील पाणी पुरवठा दुरुस्तीच्या या दाव्याची सत्यता पडताळण्यासाठी स्थानिक रिअल-टाइम माहिती आवश्यक आहे. थेट माहिती तपासणी तात्पुरती अनुपलब्ध होती. सामान्य माहितीच्या आधारावर; थेट स्रोत-तपासणी तात्पुरती उपलब्ध नव्हती.",
+    "wrongPart": null,
+    "whatToDo": "अधिकृत अपडेट्ससाठी तुमच्या स्थानिक पाणी पुरवठा विभागाच्या संकेतस्थळाला भेट द्या.",
+    "replyToSender": "कृपया या पाणी पुरवठा दुरुस्तीबाबत अधिकृत परिपत्रक किंवा विश्वसनीय लिंक शेअर करू शकता का?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "Marathi",
+    "originalClaim": "The upcoming water supply maintenance will affect Riverside, Maplewood, and Oakridge.",
+    "timestamp": 1791452058874,
     "timesChecked": 1
   }
 }
