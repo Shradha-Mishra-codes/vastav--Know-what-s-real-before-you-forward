@@ -745,5 +745,35 @@
     "originalClaim": "The upcoming water supply maintenance will affect Riverside, Maplewood, and Oakridge.",
     "timestamp": 1791452058874,
     "timesChecked": 1
+  },
+  "69c90801268b8e53c757a864fd23bb43be074160dd871040b46b7f157ec12a15": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "प्रत्येक महिलेला १ ऑक्टोबरपासून मोफत ₹५००० देण्याची कोणतीही अधिकृत सरकारी योजना जाहीर झाल्याची पुष्टी मिळालेली नाही. ही अफवा असू शकते. थेट स्त्रोत तपासणी तात्पुरती अनुपलब्ध होती. सामान्य माहितीच्या आधारावर; थेट स्रोत-तपासणी तात्पुरती उपलब्ध नव्हती.",
+    "wrongPart": null,
+    "whatToDo": "अशा दाव्यांवर विश्वास ठेवण्यापूर्वी अधिकृत सरकारी संकेतस्थळांवर माहिती तपासा.",
+    "replyToSender": "या माहितीला कोणताही अधिकृत आधार नाही, कृपया खात्री केल्याशिवाय संदेश पुढे पाठवू नका.",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "Marathi",
+    "originalClaim": "The government has announced a scheme to provide free ₹5000 to every woman starting from October 1st.",
+    "timestamp": 1791481290530,
+    "timesChecked": 1
+  },
+  "bf17e52301666436b531e203bc214e52f7c157f4a26b0ba864a66e0e20ba3568": {
+    "verdict": "UNVERIFIABLE",
+    "confidence": 0.3,
+    "explanation": "This claim refers to specific beneficiary statistics under Indian government scholarship schemes. While these schemes actively support millions of Scheduled Caste students, the precise figure of 1.44 lakh cannot be verified without real-time official reports. Note that live source-checking was temporarily unavailable. Based on general knowledge; live source-checking was temporarily unavailable.",
+    "wrongPart": null,
+    "whatToDo": "Check the official portal of the Ministry of Social Justice and Empowerment or relevant state welfare departments for official scholarship data.",
+    "replyToSender": "Could you please share the specific state or year this statistic refers to so I can look into it further?",
+    "sources": [],
+    "liveVerified": false,
+    "tactic": null,
+    "language": "English",
+    "originalClaim": "More than 1.44 lakh Scheduled Caste students benefited under the Pre-Matric and Post-Matric Scholarship Schemes.",
+    "timestamp": 1791483668902,
+    "timesChecked": 1
   }
 }

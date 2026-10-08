@@ -67,3 +67,53 @@ export interface VerificationResponse {
   riskLevel: "Low risk" | "Moderate risk" | "High risk — likely to mislead";
   transcript?: string;
 }
+
+/* ================= SAKHI CHATBOT TYPES ================= */
+
+export interface SakhiAttachment {
+  kind: "image" | "file" | "audio";
+  mimeType: string;
+  name?: string;
+  data?: string; // base64 string
+}
+
+export interface SakhiCheckPayload {
+  type: "text" | "image" | "pdf" | "audio" | "url";
+  content: string;
+  mimeType?: string;
+}
+
+export interface SakhiMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  attachments?: SakhiAttachment[];
+  timestamp?: number;
+  canRunCheck?: boolean;
+  checkPayload?: SakhiCheckPayload | null;
+  suggestions?: string[];
+}
+
+export interface SakhiRequest {
+  messages: Array<{
+    role: "user" | "assistant";
+    content: string;
+    attachments?: SakhiAttachment[];
+  }>;
+  language: string;
+  context?: {
+    recentChecks?: Array<{
+      claim: string;
+      verdict: string;
+    }>;
+  };
+}
+
+export interface SakhiResponse {
+  reply: string;
+  suggestions?: string[];
+  canRunCheck?: boolean;
+  checkPayload?: SakhiCheckPayload | null;
+  error?: string;
+  retryable?: boolean;
+}

@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Sora, Instrument_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const sora = Sora({
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-heading",
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-body",
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const notoSansDevanagari = Noto_Sans_Devanagari({
+  subsets: ["devanagari"],
+  variable: "--font-devanagari",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "SachPrism – See every side of a forward",
+  title: "Vastav – Know what's real before you forward",
   description:
-    "Split a forward into claims and review each verdict, source, and confidence level.",
+    "Paste, upload or share a forward. Vastav checks each claim against trusted sources and explains the verdict in simple words.",
   icons: { icon: "/icon.svg" },
 };
 
@@ -27,8 +36,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-accent-soft selection:text-ink">
+    <html
+      lang="en"
+      className={`${instrumentSans.variable} ${sora.variable} ${notoSansDevanagari.variable}`}
+    >
+      <body className="min-h-screen font-sans text-ink antialiased">
         {children}
       </body>
     </html>
