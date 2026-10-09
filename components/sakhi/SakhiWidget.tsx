@@ -12,7 +12,7 @@ interface SakhiWidgetProps {
   onRunCheck?: (payload: SakhiCheckPayload) => void;
 }
 
-const TOOLTIP_STORAGE_KEY = "vastav-sakhi-tooltip-opened";
+const TOOLTIP_STORAGE_KEY = "Vaastav-sakhi-tooltip-opened";
 
 export default function SakhiWidget({
   currentLanguage,

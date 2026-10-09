@@ -92,7 +92,7 @@ export default function MessageBubble({
       >
         <div>{renderSafeMarkdown(message.content)}</div>
 
-        {/* Action: Run full check in Vastav */}
+        {/* Action: Run full check in Vaastav */}
         {message.canRunCheck && message.checkPayload && (
           <div className="mt-2.5 pt-2 border-t border-border/60">
             <button
@@ -100,7 +100,7 @@ export default function MessageBubble({
               onClick={() => onRunCheck(message.checkPayload!)}
               className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#3D52D5] to-[#7A4FE0] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              <span>Run full check in Vastav</span>
+              <span>Run full check in Vaastav</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>

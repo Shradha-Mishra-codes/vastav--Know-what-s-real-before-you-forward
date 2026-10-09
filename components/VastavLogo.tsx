@@ -1,18 +1,18 @@
 import React from "react";
 
-interface VastavLogoProps {
+interface VaastavLogoProps {
   className?: string;
   size?: number;
   alt?: string;
   whiteOnly?: boolean;
 }
 
-export default function VastavLogo({
+export default function VaastavLogo({
   className = "h-10 w-10",
   size = 40,
-  alt = "Vastav logo",
+  alt = "Vaastav logo",
   whiteOnly = false,
-}: VastavLogoProps) {
+}: VaastavLogoProps) {
   if (whiteOnly) {
     // White monochrome variant for solid gradient tiles if needed
     return (
@@ -51,7 +51,7 @@ export default function VastavLogo({
 
   return (
     <img
-      src="/vastav-logo.svg"
+      src="/Vaastav-logo.svg"
       alt={alt}
       width={size}
       height={size}

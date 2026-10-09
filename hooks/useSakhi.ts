@@ -8,8 +8,8 @@ import {
   SakhiResponse,
 } from "@/lib/types";
 
-const SAKHI_STORAGE_KEY = "vastav-sakhi-chat";
-const SAKHI_PREFS_KEY = "vastav-sakhi-prefs";
+const SAKHI_STORAGE_KEY = "Vaastav-sakhi-chat";
+const SAKHI_PREFS_KEY = "Vaastav-sakhi-prefs";
 const MAX_MESSAGES = 40;
 
 const SPEECH_LANG_MAP: Record<string, string> = {

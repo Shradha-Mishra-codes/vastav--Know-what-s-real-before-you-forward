@@ -45,7 +45,7 @@ import {
   VerificationResponse,
   SakhiCheckPayload,
 } from "@/lib/types";
-import VastavLogo from "@/components/VastavLogo";
+import VaastavLogo from "@/components/VaastavLogo";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import SakhiWidget from "@/components/sakhi/SakhiWidget";
 
@@ -93,8 +93,8 @@ declare global {
 }
 
 // Storage keys with legacy migration
-const HISTORY_STORAGE_KEY = "vastav-check-history";
-const PREFERENCES_STORAGE_KEY = "vastav-preferences";
+const HISTORY_STORAGE_KEY = "Vaastav-check-history";
+const PREFERENCES_STORAGE_KEY = "Vaastav-preferences";
 const LEGACY_HISTORY_KEY = "truthlens-check-history";
 const LEGACY_PREFS_KEY = "truthlens-preferences";
 const HISTORY_LIMIT = 50;
@@ -220,7 +220,7 @@ function RiskGauge({
       : "#FF5C6C";
 
   return (
-    <div className="vastav-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
+    <div className="Vaastav-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
       <div
         role="meter"
         aria-label="Risk score"
@@ -263,7 +263,7 @@ function RiskGauge({
   );
 }
 
-export default function VastavHome() {
+export default function VaastavHome() {
   const reduceMotion = useReducedMotion();
 
   // Navigation & View state
@@ -465,7 +465,7 @@ export default function VastavHome() {
       .map((claim, index) => `${index + 1}. [${claim.verdict}] ${claim.claim}`)
       .join("\n");
     const certificateSummary = [
-      "Vastav proof of check",
+      "Vaastav proof of check",
       claimSummary || `Result: ${result.overall}`,
       `Overall verdict: ${result.overall}`,
       `Risk score: ${result.riskScore}/100 (${result.riskLevel})`,
@@ -744,7 +744,7 @@ export default function VastavHome() {
     executeVerification(payload);
   };
 
-  // Sakhi Handoff: "Run full check in Vastav"
+  // Sakhi Handoff: "Run full check in Vaastav"
   const handleSakhiRunCheck = (payload: SakhiCheckPayload) => {
     if (payload.type === "url") {
       setActiveTab("url");
@@ -785,7 +785,7 @@ export default function VastavHome() {
       });
 
       const link = document.createElement("a");
-      link.download = `vastav-factcheck-${Date.now()}.png`;
+      link.download = `Vaastav-factcheck-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -809,7 +809,7 @@ export default function VastavHome() {
         height: 900,
       });
       const link = document.createElement("a");
-      link.download = `vastav-certificate-${Date.now()}.png`;
+      link.download = `Vaastav-certificate-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -828,14 +828,14 @@ export default function VastavHome() {
     const noneLiveVerified =
       result.claims.length > 0 && result.claims.every((claim) => !claim.liveVerified);
     const verificationFooter = allLiveVerified
-      ? "Checked using live web sources via Vastav."
+      ? "Checked using live web sources via Vaastav."
       : noneLiveVerified
-      ? "Checked using Vastav AI assessment (live source-checking was unavailable)."
+      ? "Checked using Vaastav AI assessment (live source-checking was unavailable)."
       : result.claims.length === 0
-      ? "No claims were available for source-checking via Vastav."
-      : "Checked using a mix of live web sources and AI assessment via Vastav (see individual claims).";
+      ? "No claims were available for source-checking via Vaastav."
+      : "Checked using a mix of live web sources and AI assessment via Vaastav (see individual claims).";
     const summaryLines = [
-      `🔍 *Vastav Verification Summary*`,
+      `🔍 *Vaastav Verification Summary*`,
       `Overall Verdict: *${result.overall}*`,
       "",
       ...result.claims.map((c, i) =>
@@ -891,8 +891,8 @@ export default function VastavHome() {
       window.localStorage.removeItem(PREFERENCES_STORAGE_KEY);
       window.localStorage.removeItem(LEGACY_HISTORY_KEY);
       window.localStorage.removeItem(LEGACY_PREFS_KEY);
-      window.localStorage.removeItem("vastav-sakhi-chat");
-      window.localStorage.removeItem("vastav-sakhi-tooltip-opened");
+      window.localStorage.removeItem("Vaastav-sakhi-chat");
+      window.localStorage.removeItem("Vaastav-sakhi-tooltip-opened");
     } catch (storageError) {
       console.warn("Could not completely remove browser data:", storageError);
     }
@@ -1021,7 +1021,7 @@ export default function VastavHome() {
         type="button"
         onClick={() => navigateTo(tab)}
         aria-current={isActive ? "page" : undefined}
-        className={`vastav-nav-item w-full ${isActive ? "is-active" : ""}`}
+        className={`Vaastav-nav-item w-full ${isActive ? "is-active" : ""}`}
       >
         <Icon className="h-4 w-4 shrink-0" />
         <span>{label}</span>
@@ -1030,13 +1030,13 @@ export default function VastavHome() {
   };
 
   return (
-    <div className="vastav-app-shell min-h-screen text-ink relative">
+    <div className="Vaastav-app-shell min-h-screen text-ink relative">
       {/* Animated Lavender Sky background rendered once behind everything */}
       <AnimatedBackground />
 
       <div className="mx-auto flex min-h-screen max-w-[1600px] relative z-10">
         {/* DESKTOP SIDEBAR (>=1000px, 224px width, glassmorphism) */}
-        <aside className="vastav-sidebar hidden shrink-0 flex-col px-3.5 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[224px]">
+        <aside className="Vaastav-sidebar hidden shrink-0 flex-col px-3.5 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[224px]">
           {/* Logo Brand Header */}
           <div className="flex items-center gap-3 px-2">
             <div
@@ -1045,11 +1045,11 @@ export default function VastavHome() {
                 background: "linear-gradient(135deg, #3D52D5 0%, #7A4FE0 100%)",
               }}
             >
-              <VastavLogo whiteOnly size={24} className="h-6 w-6" />
+              <VaastavLogo whiteOnly size={24} className="h-6 w-6" />
             </div>
             <div>
               <p className="font-heading text-base font-extrabold tracking-widest text-ink leading-tight">
-                VASTAV
+                Vaastav
               </p>
               <p className="font-devanagari text-xs font-semibold text-mut leading-none mt-0.5">
                 वास्तव
@@ -1060,7 +1060,7 @@ export default function VastavHome() {
           {/* Navigation Links */}
           <div className="mt-8 flex-1 overflow-y-auto space-y-6 pr-1">
             <div className="space-y-1">
-              <p className="vastav-sidebar-label px-3">Check</p>
+              <p className="Vaastav-sidebar-label px-3">Check</p>
               {renderNavigationButton("text", "Text", FileText)}
               {renderNavigationButton("image", "Screenshot", ImageIcon)}
               {renderNavigationButton("audio", "Voice note", Mic)}
@@ -1069,7 +1069,7 @@ export default function VastavHome() {
             </div>
 
             <div className="space-y-1">
-              <p className="vastav-sidebar-label px-3">More</p>
+              <p className="Vaastav-sidebar-label px-3">More</p>
               {renderNavigationButton("history", "History", HistoryIcon)}
               {renderNavigationButton("trending", "Trending near you", Bell)}
               {renderNavigationButton("learn", "Learn", GraduationCap)}
@@ -1095,7 +1095,7 @@ export default function VastavHome() {
               onClick={() => setSidebarOpen(false)}
               className="absolute inset-0 bg-[#1D2760]/30 backdrop-blur-sm"
             />
-            <aside className="vastav-sidebar relative z-10 flex h-full w-[min(18rem,84vw)] flex-col border-r px-4 py-5 shadow-2xl">
+            <aside className="Vaastav-sidebar relative z-10 flex h-full w-[min(18rem,84vw)] flex-col border-r px-4 py-5 shadow-2xl">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
@@ -1104,11 +1104,11 @@ export default function VastavHome() {
                       background: "linear-gradient(135deg, #3D52D5 0%, #7A4FE0 100%)",
                     }}
                   >
-                    <VastavLogo whiteOnly size={24} className="h-6 w-6" />
+                    <VaastavLogo whiteOnly size={24} className="h-6 w-6" />
                   </div>
                   <div>
                     <p className="font-heading text-base font-extrabold tracking-widest text-ink leading-tight">
-                      VASTAV
+                      Vaastav
                     </p>
                     <p className="font-devanagari text-xs font-semibold text-mut">वास्तव</p>
                   </div>
@@ -1125,7 +1125,7 @@ export default function VastavHome() {
 
               <div className="flex-1 overflow-y-auto space-y-5">
                 <div className="space-y-1">
-                  <p className="vastav-sidebar-label px-3">Check</p>
+                  <p className="Vaastav-sidebar-label px-3">Check</p>
                   {renderNavigationButton("text", "Text", FileText)}
                   {renderNavigationButton("image", "Screenshot", ImageIcon)}
                   {renderNavigationButton("audio", "Voice note", Mic)}
@@ -1134,7 +1134,7 @@ export default function VastavHome() {
                 </div>
 
                 <div className="space-y-1">
-                  <p className="vastav-sidebar-label px-3">More</p>
+                  <p className="Vaastav-sidebar-label px-3">More</p>
                   {renderNavigationButton("history", "History", HistoryIcon)}
                   {renderNavigationButton("trending", "Trending near you", Bell)}
                   {renderNavigationButton("learn", "Learn", GraduationCap)}
@@ -1149,7 +1149,7 @@ export default function VastavHome() {
         {/* MAIN VIEW AREA */}
         <div className="flex min-h-screen min-w-0 flex-1 flex-col">
           {/* Top Bar for Mobile & Tablet (<1000px) */}
-          <div className="vastav-mobile-header flex items-center justify-between px-4 py-3 lg:hidden">
+          <div className="Vaastav-mobile-header flex items-center justify-between px-4 py-3 lg:hidden">
             <div className="flex items-center gap-2.5">
               <button
                 type="button"
@@ -1160,9 +1160,9 @@ export default function VastavHome() {
                 <Menu className="h-5 w-5" />
               </button>
               <div className="flex items-center gap-2">
-                <VastavLogo size={28} className="h-7 w-7" />
+                <VaastavLogo size={28} className="h-7 w-7" />
                 <span className="font-heading font-extrabold tracking-wider text-ink text-sm">
-                  VASTAV
+                  Vaastav
                 </span>
               </div>
             </div>
@@ -1259,7 +1259,7 @@ export default function VastavHome() {
                       Know what&apos;s <span className="headline-gradient-word">real</span> before you forward.
                     </h1>
                     <p className="mt-2.5 text-base sm:text-lg text-mut font-normal max-w-xl">
-                      Paste, upload or share. Vastav checks it against trusted sources and tells you exactly why.
+                      Paste, upload or share. Vaastav checks it against trusted sources and tells you exactly why.
                     </p>
                   </div>
 
@@ -1288,7 +1288,7 @@ export default function VastavHome() {
                   </div>
 
                   {/* Check Card */}
-                  <div className="vastav-card p-5 sm:p-7 space-y-5">
+                  <div className="Vaastav-card p-5 sm:p-7 space-y-5">
                     {/* Tabs row with 3px indigo underline */}
                     <div className="flex items-center gap-4 sm:gap-6 border-b border-border/80 pb-3 overflow-x-auto scrollbar-none">
                       {[
@@ -1340,7 +1340,7 @@ export default function VastavHome() {
                               value={textContent}
                               onChange={(e) => setTextContent(e.target.value)}
                               placeholder="Govt announces free ₹5000 to every woman from 1 Oct. Forward to 10 groups to register."
-                              className="vastav-input min-h-[7.5rem] resize-y"
+                              className="Vaastav-input min-h-[7.5rem] resize-y"
                             />
                           </div>
                         )}
@@ -1506,7 +1506,7 @@ export default function VastavHome() {
                                 value={urlContent}
                                 onChange={(e) => setUrlContent(e.target.value)}
                                 placeholder="https://example.com/news-story..."
-                                className="vastav-input pl-10"
+                                className="Vaastav-input pl-10"
                               />
                             </div>
                           </div>
@@ -1539,7 +1539,7 @@ export default function VastavHome() {
                         type="button"
                         disabled={isInputEmpty() || isLoading}
                         onClick={handleVerify}
-                        className="vastav-btn-primary px-6 py-3.5 text-sm sm:text-base w-full sm:w-auto min-h-[48px]"
+                        className="Vaastav-btn-primary px-6 py-3.5 text-sm sm:text-base w-full sm:w-auto min-h-[48px]"
                       >
                         <span>Check this forward →</span>
                       </button>
@@ -1587,7 +1587,7 @@ export default function VastavHome() {
 
                 {/* Right Column: 310px Live Result Preview card (Matches Screenshot) */}
                 <div className="hidden lg:block w-[310px] shrink-0">
-                  <div className="vastav-card p-6 space-y-5">
+                  <div className="Vaastav-card p-6 space-y-5">
                     {/* Header */}
                     <div>
                       <p className="text-[10px] font-extrabold tracking-widest text-[#7b86b8] uppercase">
@@ -1689,16 +1689,16 @@ export default function VastavHome() {
 
             {/* LOADING STATE */}
             {isLoading && (
-              <div className="vastav-card p-6 sm:p-10 space-y-6 text-center max-w-2xl mx-auto my-8">
+              <div className="Vaastav-card p-6 sm:p-10 space-y-6 text-center max-w-2xl mx-auto my-8">
                 <div className="flex justify-center">
                   <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-[#3D52D5] to-[#7A4FE0] p-3 text-white shadow-glow animate-pulse">
-                    <VastavLogo whiteOnly size={40} className="h-10 w-10" />
+                    <VaastavLogo whiteOnly size={40} className="h-10 w-10" />
                   </div>
                 </div>
 
                 <div>
                   <h2 className="font-heading text-xl sm:text-2xl font-bold text-ink">
-                    Examining claims with Vastav
+                    Examining claims with Vaastav
                   </h2>
                   <p className="text-sm font-semibold text-brand-1 mt-1">
                     {verifyingProgressText}
@@ -1741,7 +1741,7 @@ export default function VastavHome() {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="vastav-btn-secondary px-4 py-2 text-xs font-bold"
+                      className="Vaastav-btn-secondary px-4 py-2 text-xs font-bold"
                     >
                       <span>← Check another forward</span>
                     </button>
@@ -1750,7 +1750,7 @@ export default function VastavHome() {
                       <button
                         type="button"
                         onClick={handleCopySummary}
-                        className="vastav-btn-secondary px-3 py-2 text-xs"
+                        className="Vaastav-btn-secondary px-3 py-2 text-xs"
                       >
                         {copiedSummary ? (
                           <span className="text-emerald-700 font-bold flex items-center gap-1">
@@ -1768,7 +1768,7 @@ export default function VastavHome() {
                         type="button"
                         onClick={handleDownloadShareCard}
                         disabled={isDownloadingCard}
-                        className="vastav-btn-secondary px-3 py-2 text-xs"
+                        className="Vaastav-btn-secondary px-3 py-2 text-xs"
                       >
                         <Download className="h-3.5 w-3.5 text-brand-1" />
                         <span>{isDownloadingCard ? "Generating…" : "WhatsApp card"}</span>
@@ -1778,7 +1778,7 @@ export default function VastavHome() {
                         type="button"
                         onClick={handleDownloadCertificate}
                         disabled={!qrCodeGenerated || isDownloadingCertificate}
-                        className="vastav-btn-secondary px-3 py-2 text-xs"
+                        className="Vaastav-btn-secondary px-3 py-2 text-xs"
                       >
                         <ShieldCheck className="h-3.5 w-3.5 text-brand-2" />
                         <span>Certificate</span>
@@ -1841,7 +1841,7 @@ export default function VastavHome() {
                     </div>
 
                     {result.claims.length === 0 ? (
-                      <div className="vastav-card p-6 text-center text-sm text-mut">
+                      <div className="Vaastav-card p-6 text-center text-sm text-mut">
                         No specific factual claims were found in the provided forward.
                       </div>
                     ) : (
@@ -1850,7 +1850,7 @@ export default function VastavHome() {
                         return (
                           <div
                             key={claim.id || idx}
-                            className={`vastav-card p-5 sm:p-6 space-y-4 border ${vStyle.border}`}
+                            className={`Vaastav-card p-5 sm:p-6 space-y-4 border ${vStyle.border}`}
                           >
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                               <div className="flex items-start gap-2.5">
@@ -1896,7 +1896,7 @@ export default function VastavHome() {
                                     setCopiedClaimId(claim.id);
                                     setTimeout(() => setCopiedClaimId(null), 2000);
                                   }}
-                                  className="vastav-btn-secondary px-3 py-1.5 text-xs shrink-0"
+                                  className="Vaastav-btn-secondary px-3 py-1.5 text-xs shrink-0"
                                 >
                                   {copiedClaimId === claim.id ? "Copied!" : "Copy reply"}
                                 </button>
@@ -1938,7 +1938,7 @@ export default function VastavHome() {
             {!isCheckView && (
               <div className="space-y-6">
                 {activeTab === "history" && (
-                  <div className="vastav-card p-6 space-y-4">
+                  <div className="Vaastav-card p-6 space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <h2 className="font-heading text-xl font-bold text-ink">Check History</h2>
@@ -1953,7 +1953,7 @@ export default function VastavHome() {
                           setHistory([]);
                           window.localStorage.removeItem(HISTORY_STORAGE_KEY);
                         }}
-                        className="vastav-btn-secondary text-xs text-rose-700 hover:bg-rose-50 border-rose-200"
+                        className="Vaastav-btn-secondary text-xs text-rose-700 hover:bg-rose-50 border-rose-200"
                       >
                         Clear history
                       </button>
@@ -1964,7 +1964,7 @@ export default function VastavHome() {
                       value={historyQuery}
                       onChange={(e) => setHistoryQuery(e.target.value)}
                       placeholder="Search saved claims or verdicts..."
-                      className="vastav-input text-xs"
+                      className="Vaastav-input text-xs"
                     />
 
                     {history.length === 0 ? (
@@ -2012,7 +2012,7 @@ export default function VastavHome() {
                 )}
 
                 {activeTab === "trending" && (
-                  <div className="vastav-card p-6 space-y-4">
+                  <div className="Vaastav-card p-6 space-y-4">
                     <h2 className="font-heading text-xl font-bold text-ink">Trending near you</h2>
                     <p className="text-xs text-mut">Curated forward patterns and common checks</p>
 
@@ -2051,7 +2051,7 @@ export default function VastavHome() {
                 )}
 
                 {activeTab === "learn" && (
-                  <div className="vastav-card p-6 space-y-6">
+                  <div className="Vaastav-card p-6 space-y-6">
                     <div>
                       <h2 className="font-heading text-xl font-bold text-ink">Fact-Checking Habits</h2>
                       <p className="text-xs text-mut">Simple habits to protect yourself and your family</p>
@@ -2110,7 +2110,7 @@ export default function VastavHome() {
                 )}
 
                 {activeTab === "settings" && (
-                  <div className="vastav-card p-6 space-y-6">
+                  <div className="Vaastav-card p-6 space-y-6">
                     <h2 className="font-heading text-xl font-bold text-ink">Settings</h2>
 
                     {/* Language Setting */}
@@ -2187,9 +2187,9 @@ export default function VastavHome() {
                 )}
 
                 {activeTab === "standards" && (
-                  <div className="vastav-card p-6 space-y-4">
+                  <div className="Vaastav-card p-6 space-y-4">
                     <h2 className="font-heading text-xl font-bold text-ink">Verification Standards</h2>
-                    <p className="text-xs text-mut">How Vastav verifies claims without bias or speculation</p>
+                    <p className="text-xs text-mut">How Vaastav verifies claims without bias or speculation</p>
                     <div className="space-y-3 text-sm text-ink leading-relaxed">
                       <p>
                         <strong>1. Atomic Claim Breakdown:</strong> We break complicated forwarded texts into individual claims so truths and falsehoods are separated.
@@ -2198,7 +2198,7 @@ export default function VastavHome() {
                         <strong>2. Trusted Registries:</strong> Claims are checked against official government gazettes, news archives, and authoritative registries.
                       </p>
                       <p>
-                        <strong>3. Honest Uncertainty:</strong> If no reliable evidence can be confirmed, Vastav explicitly marks the claim as <em>Unverified</em> rather than guessing.
+                        <strong>3. Honest Uncertainty:</strong> If no reliable evidence can be confirmed, Vaastav explicitly marks the claim as <em>Unverified</em> rather than guessing.
                       </p>
                     </div>
                   </div>
@@ -2210,7 +2210,7 @@ export default function VastavHome() {
           {/* MOBILE FIXED BOTTOM NAVIGATION (<700px) */}
           <nav
             aria-label="Mobile Navigation"
-            className="vastav-bottom-nav fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t px-2 py-2 lg:hidden"
+            className="Vaastav-bottom-nav fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t px-2 py-2 lg:hidden"
             style={{
               paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
             }}
@@ -2309,10 +2309,10 @@ export default function VastavHome() {
             <div className="relative z-10">
               <div className="flex items-center justify-between border-b-2 border-[#CBD5FA] pb-8">
                 <div className="flex items-center gap-5">
-                  <VastavLogo className="h-20 w-20 rounded-2xl shadow-[0_8px_20px_rgba(61,82,213,0.2)]" size={80} />
+                  <VaastavLogo className="h-20 w-20 rounded-2xl shadow-[0_8px_20px_rgba(61,82,213,0.2)]" size={80} />
                   <div>
                     <div className="flex items-center gap-3">
-                      <h2 className="text-4xl font-extrabold tracking-tight font-heading text-[#1D2760]">VASTAV</h2>
+                      <h2 className="text-4xl font-extrabold tracking-tight font-heading text-[#1D2760]">Vaastav</h2>
                       <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#3D52D5]/10 text-[#3D52D5]">वास्तव</span>
                     </div>
                     <p className="text-xl text-[#566099] font-medium mt-1">
@@ -2416,7 +2416,7 @@ export default function VastavHome() {
             <div className="relative z-10 border-t-2 border-[#CBD5FA] pt-8 flex items-center justify-between text-[#566099] text-base">
               <div className="flex items-center gap-2 font-medium">
                 <Sparkles className="w-5 h-5 text-[#3D52D5]" />
-                <span>Grounded with Google Search • Reviewed by Vastav</span>
+                <span>Grounded with Google Search • Reviewed by Vaastav</span>
               </div>
               <span className="text-[#1D2760] font-bold">
                 Stop the spread. Verify before forwarding.
@@ -2465,10 +2465,10 @@ export default function VastavHome() {
               {/* Header */}
               <div className="flex items-center justify-between border-b-2 border-[#CBD5FA] pb-6">
                 <div className="flex items-center gap-4">
-                  <VastavLogo className="h-16 w-16 rounded-2xl shadow-md" size={64} />
+                  <VaastavLogo className="h-16 w-16 rounded-2xl shadow-md" size={64} />
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="text-2xl font-black font-heading text-[#1D2760]">VASTAV</p>
+                      <p className="text-2xl font-black font-heading text-[#1D2760]">Vaastav</p>
                       <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#3D52D5]/10 text-[#3D52D5]">वास्तव</span>
                     </div>
                     <p className="text-xs font-bold uppercase tracking-wider text-[#566099]">Official Verification Certificate</p>
@@ -2547,7 +2547,7 @@ export default function VastavHome() {
                   This QR contains the claim verdicts, overall verdict, risk score, and date checked.
                 </p>
                 <div className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-[#3D52D5]/10 px-3 py-1 text-[11px] font-bold text-[#3D52D5]">
-                  <span>🛡️ VASTAV CERTIFIED CREDENTIAL</span>
+                  <span>🛡️ Vaastav CERTIFIED CREDENTIAL</span>
                 </div>
                 <p className="mt-3 text-xs font-semibold text-[#1D2760]">
                   Know what&apos;s real before you forward.

@@ -70,20 +70,20 @@ h4 {
 }
 
 @layer components {
-  /* Vastav Cards */
-  .vastav-card {
+  /* Vaastav Cards */
+  .Vaastav-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--card-radius);
     box-shadow: var(--shadow-card);
   }
 
-  .vastav-card-interactive {
-    @apply vastav-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover;
+  .Vaastav-card-interactive {
+    @apply Vaastav-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover;
   }
 
   /* Buttons */
-  .vastav-btn-primary {
+  .Vaastav-btn-primary {
     position: relative;
     overflow: hidden;
     display: inline-flex;
@@ -98,22 +98,22 @@ h4 {
     transition: all 0.2s ease;
   }
 
-  .vastav-btn-primary:hover {
+  .Vaastav-btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 14px 30px rgba(61, 82, 213, 0.45);
   }
 
-  .vastav-btn-primary:active {
+  .Vaastav-btn-primary:active {
     transform: translateY(0) scale(0.98);
   }
 
-  .vastav-btn-primary:disabled {
+  .Vaastav-btn-primary:disabled {
     opacity: 0.5;
     pointer-events: none;
   }
 
   /* Shimmer sweep on primary button */
-  .vastav-btn-primary::after {
+  .Vaastav-btn-primary::after {
     content: "";
     position: absolute;
     top: -50%;
@@ -130,7 +130,7 @@ h4 {
     animation: shimmer-sweep 5s infinite ease-in-out;
   }
 
-  .vastav-btn-secondary {
+  .Vaastav-btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -144,19 +144,19 @@ h4 {
     transition: all 0.2s ease;
   }
 
-  .vastav-btn-secondary:hover {
+  .Vaastav-btn-secondary:hover {
     background: #ffffff;
     border-color: #a8b8f8;
     box-shadow: var(--shadow-soft);
     transform: translateY(-1px);
   }
 
-  .vastav-btn-secondary:active {
+  .Vaastav-btn-secondary:active {
     transform: scale(0.98);
   }
 
   /* Inputs */
-  .vastav-input {
+  .Vaastav-input {
     width: 100%;
     border-radius: 14px;
     border: 1px solid #CBD5FA;
@@ -167,36 +167,36 @@ h4 {
     transition: all 0.2s ease;
   }
 
-  .vastav-input:focus {
+  .Vaastav-input:focus {
     outline: none;
     background: #ffffff;
     border-color: var(--brand-1);
     box-shadow: 0 0 0 4px rgba(61, 82, 213, 0.15);
   }
 
-  .vastav-input::placeholder {
+  .Vaastav-input::placeholder {
     color: #8c97c4;
   }
 
   /* Legacy utility alias map for existing subpages */
   .sp-panel {
-    @apply vastav-card;
+    @apply Vaastav-card;
   }
 
   .sp-panel-interactive {
-    @apply vastav-card-interactive;
+    @apply Vaastav-card-interactive;
   }
 
   .sp-btn-primary {
-    @apply vastav-btn-primary px-4 py-3 text-sm;
+    @apply Vaastav-btn-primary px-4 py-3 text-sm;
   }
 
   .sp-btn-secondary {
-    @apply vastav-btn-secondary px-3 py-2 text-xs;
+    @apply Vaastav-btn-secondary px-3 py-2 text-xs;
   }
 
   .sp-input {
-    @apply vastav-input;
+    @apply Vaastav-input;
   }
 
   .sp-link {
@@ -239,13 +239,13 @@ h4 {
 }
 
 /* App Shell and Sidebar */
-.vastav-app-shell {
+.Vaastav-app-shell {
   min-height: 100vh;
   position: relative;
   background: transparent;
 }
 
-.vastav-sidebar {
+.Vaastav-sidebar {
   width: 224px;
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(16px);
@@ -254,7 +254,7 @@ h4 {
   box-shadow: 4px 0 24px rgba(61, 82, 213, 0.05);
 }
 
-.vastav-sidebar-label {
+.Vaastav-sidebar-label {
   color: #7b86b8;
   font-size: 10.5px;
   font-weight: 700;
@@ -262,7 +262,7 @@ h4 {
   text-transform: uppercase;
 }
 
-.vastav-nav-item {
+.Vaastav-nav-item {
   color: #3b4780;
   border-radius: 12px;
   padding: 0.625rem 0.875rem;
@@ -275,31 +275,31 @@ h4 {
   border: 1px solid transparent;
 }
 
-.vastav-nav-item:hover {
+.Vaastav-nav-item:hover {
   color: var(--ink);
   background: rgba(255, 255, 255, 0.7);
   transform: translateX(2px);
 }
 
-.vastav-nav-item.is-active {
+.Vaastav-nav-item.is-active {
   background: var(--brand-gradient);
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 6px 18px rgba(61, 82, 213, 0.28);
 }
 
-.vastav-nav-item.is-active svg {
+.Vaastav-nav-item.is-active svg {
   color: #ffffff;
 }
 
-.vastav-mobile-header {
+.Vaastav-mobile-header {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.7);
 }
 
-.vastav-bottom-nav {
+.Vaastav-bottom-nav {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -652,7 +652,7 @@ h4 {
     animation: none !important;
   }
 
-  .vastav-btn-primary::after {
+  .Vaastav-btn-primary::after {
     animation: none !important;
   }
 }

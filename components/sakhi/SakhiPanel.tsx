@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import Composer from "./Composer";
-import VastavLogo from "../VastavLogo";
+import VaastavLogo from "../VaastavLogo";
 import { SakhiMessage, SakhiAttachment, SakhiCheckPayload } from "@/lib/types";
 
 interface SakhiPanelProps {
@@ -125,7 +125,7 @@ export default function SakhiPanel({
         <div className="flex items-center gap-2.5">
           {/* Avatar */}
           <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 p-1 ring-2 ring-white/30 backdrop-blur-sm">
-            <VastavLogo className="h-7 w-7 object-contain" size={28} />
+            <VaastavLogo className="h-7 w-7 object-contain" size={28} />
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#3D52D5] bg-[#2FD08F]" />
           </div>
 

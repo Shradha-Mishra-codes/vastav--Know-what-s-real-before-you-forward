@@ -24,9 +24,9 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
-  title: "Vastav – Know what's real before you forward",
+  title: "Vaastav – Know what's real before you forward",
   description:
-    "Paste, upload or share a forward. Vastav checks each claim against trusted sources and explains the verdict in simple words.",
+    "Paste, upload or share a forward. Vaastav checks each claim against trusted sources and explains the verdict in simple words.",
   icons: { icon: "/icon.svg" },
 };
 

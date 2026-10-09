@@ -1,8 +1,8 @@
-# Vastav (वास्तव)
+# Vaastav (वास्तव)
 
 > **Know what's real before you forward.**
 
-Vastav is a modern fact-checking application that splits WhatsApp forwards, news, health tips, and government scheme claims into atomic factual statements, verifies each claim against trusted sources with citations, and explains verdicts in plain language. Includes **Sakhi (सखी)**, your warm in-app conversational fact-checking companion.
+Vaastav is a modern fact-checking application that splits WhatsApp forwards, news, health tips, and government scheme claims into atomic factual statements, verifies each claim against trusted sources with citations, and explains verdicts in plain language. Includes **Sakhi (सखी)**, your warm in-app conversational fact-checking companion.
 
 ## Features
 
