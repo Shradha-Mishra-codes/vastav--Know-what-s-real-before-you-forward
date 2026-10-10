@@ -40,7 +40,10 @@ export type CachedLanguageResult = Pick<
   | "tactic"
 >;
 
-const CACHE_DIR = path.join(process.cwd(), "data");
+const CACHE_DIR = process.env.VERCEL
+  ? "/tmp"
+  : path.join(process.cwd(), "data");
+
 const CACHE_FILE = path.join(CACHE_DIR, "claim-cache.json");
 const CLAIM_STOPWORDS = new Set([
   "a", "about", "after", "again", "all", "also", "am", "an", "and", "any", "are", "as", "at",
